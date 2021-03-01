@@ -15,7 +15,5 @@ public class LoadConfig {
         GameLogic.STAGESIZEY = Integer.valueOf(br.readLine());
         GameLogic.VISIBLEROWS = Integer.valueOf(br.readLine());
         GameLogic.NEXTPIECESMAX = Integer.valueOf(br.readLine());
-        Constants.idLength = Integer.valueOf(br.readLine());
-        Constants.idCharSet = String.valueOf(br.readLine());
     }
 }
