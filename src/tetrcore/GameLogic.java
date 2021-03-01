@@ -6,15 +6,6 @@ import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-
-import com.cryptomorin.xseries.XSound;
-import com.cryptomorin.xseries.messages.Titles;
-
-import tetr.core.minecraft.Main;
-import tetr.core.minecraft.Room;
-
 public class GameLogic {
     /*
      * abcd abcd abc1 xabc ab1d xabd ab11 xxab a1cd xacd a1c1 xxac a11d xxad a111
@@ -118,8 +109,7 @@ public class GameLogic {
         }
 
     }
-
-    private Player player;
+    
     public String magicString = "";
     private int magicStringsActive = 0;
 
@@ -204,14 +194,6 @@ public class GameLogic {
 
     public int getCombo() {
         return combo;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public void setPlayer(Player player) {
-        this.player = player;
     }
 
     public int getMagicStringsActive() {
@@ -433,13 +415,9 @@ public class GameLogic {
     public void setCombo(int combo) {
         this.combo = combo;
     }
-
-    public GameLogic(Player player) {
-        this.player = player;
-    }
-
+    
     public GameLogic() {
-        this.player = null;
+        
     }
 
     private boolean checkOOBE(int x, int y) {
@@ -515,11 +493,7 @@ public class GameLogic {
         }
 
         if (garbageRemaining > 0) {
-            if (this.player == null) {
-                receiveGarbage(garbageRemaining);
-            } else {
-                Main.inwhichroom.get(player).forwardGarbage(garbageRemaining, player);
-            }
+            
         }
     }
 
@@ -635,12 +609,7 @@ public class GameLogic {
 
             if (cornersFilled >= 3) {
 
-                if (player != null) {
-                    for (int i = 0; i < 3; i++) {
-                        player.playSound(player.getEyeLocation(), XSound.BLOCK_END_PORTAL_FRAME_FILL.parseSound(), 1f,
-                                1f);
-                    }
-                }
+                
                 tSpinMini = true;
 
                 switch (currentPieceRotation) {
@@ -856,40 +825,10 @@ public class GameLogic {
 
             if (linesCleared > 0) {
                 combo++;
-                if (player != null) {
-                    if (linesCleared == 4 || currentPieceHasSpun) {
-                        setB2b(getB2b() + 1);
-                        if(getB2b() > 0) {
-                            for (int i = 0; i < getB2b() + 2; i++) {
-                                player.playSound(player.getEyeLocation(), XSound.BLOCK_NOTE_BLOCK_PLING.parseSound(), 1f,
-                                        (float) Math.pow(2, (double) (getB2b() * 2 - 12) / 12));
-                            }
-                        }
-                    } else {
-                        for (int i = 0; i < linesCleared * 2; i++) {
-                            player.playSound(player.getEyeLocation(), XSound.BLOCK_NOTE_BLOCK_HARP.parseSound(), 1f,
-                                    (float) Math.pow(2, (double) (combo * 2 - 12) / 12));
-                        }
-                        if(getB2b() > 1) {
-                            setB2b(-1);
-                            for (int i = 0; i < 5; i++) {
-                                player.playSound(player.getEyeLocation(), XSound.ENTITY_ARMOR_STAND_HIT.parseSound(), 1f, 1f);
-                            }
-                        }
-                    }
-                    if (currentPieceHasSpun) {
-                        for (int i = 0; i < linesCleared * 2; i++) {
-                            player.playSound(player.getEyeLocation(), XSound.ENTITY_FIREWORK_ROCKET_BLAST.parseSound(),
-                                    1f, 0.5f);
-                        }
-                    }
-                }
+                
                 if ((totalLinesCleared - totalGarbageReceived) * STAGESIZEX + totalGarbageReceived == totalPiecesPlaced
                         * 4) {
-                    if (player != null) {
-                        player.playSound(player.getEyeLocation(), XSound.BLOCK_ANVIL_LAND.parseSound(), 1f, 0.5f);
-                        Titles.sendTitle(player, 20, 20, 20, "", ChatColor.GOLD + "" + ChatColor.BOLD + "ALL CLEAR");
-                    }
+                    
                     sendGarbage((int) ((garbagetable[clearTypeToInt(getClearTypeNow(linesCleared))][combo] + 10)
                             * garbageMultiplier.getWorkingValue()));
                 } else {
@@ -1032,20 +971,6 @@ public class GameLogic {
                     //long timeElapsed = timeEnd - timeStart;
                     //System.out.println((float)timeElapsed/1000000 + " ms");
                 }
-
-                if (player != null) {
-                    Room room = Main.inwhichroom.get(player);
-
-                    if (room != null) {
-                        if (Main.roommap.containsKey(room.id)) {
-                            room.playersalive--;
-                            if (room.playersalive < 2) {
-                                room.stopRoom();
-                            }
-                        }
-                    }
-                }
-                this.interrupt();
             }
         }.start();
 
