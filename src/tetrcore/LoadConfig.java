@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 
 public class LoadConfig {
     
-    static InputStream file = LoadConfig.class.getResourceAsStream("stupidconfig.txt");
+    static InputStream file = LoadConfig.class.getResourceAsStream("config.txt");
     
     public static void load() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(file));
