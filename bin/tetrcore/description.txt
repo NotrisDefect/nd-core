@@ -1,4 +1,0 @@
-STAGESIZEX - shared
-STAGESIZEY - shared
-VISIBLEROWS - shared
-NEXTPIECESMAX - shared
