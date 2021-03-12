@@ -288,89 +288,6 @@ public class GameLogic {
         return false;
     }
 
-    public void clearLine(int line) {
-
-        for (int j = 0; j < STAGESIZEX; j++) {
-            stage[0][j] = 7;
-        }
-
-        for (int i = line; i > 0; i--) {
-            for (int j = 0; j < STAGESIZEX; j++) {
-                stage[i][j] = stage[i - 1][j];
-            }
-        }
-
-        totalLinesCleared++;
-    }
-
-    public int clearLines() {
-        int numClears = 0;
-        boolean yes;
-        for (int i = STAGESIZEY - 1; i > 0; i--) {
-            yes = true;
-            for (int j = 0; j < STAGESIZEX; j++) {
-                if (stage[i][j] == 7) {
-                    yes = false;
-                    break;
-                }
-            }
-            if (yes) {
-                clearLine(i);
-                i++;
-                numClears++;
-            }
-        }
-
-        return numClears;
-    }
-
-    public void clearLinesZone() {
-
-        boolean yes;
-        for (int i = STAGESIZEY - 1 - zonelines; i > 0; i--) {
-            yes = true;
-            for (int j = 0; j < STAGESIZEX; j++) {
-                if (stage[i][j] == 7) {
-                    yes = false;
-                    break;
-                }
-            }
-            if (yes) {
-                zonelines++;
-                clearLineZone(i);
-            }
-        }
-    }
-
-    public void clearLineZone(int line) {
-        int gap = STAGESIZEY - (line + zonelines);
-        for (int i = line; i < line + gap; i++) {
-            for (int j = 0; j < STAGESIZEX; j++) {
-                stage[i][j] = stage[i + 1][j];
-            }
-        }
-        for (int j = 0; j < STAGESIZEX; j++) {
-            stage[STAGESIZEY - zonelines][j] = 16;
-        }
-
-        magicString = zonelines + " LINES";
-    }
-
-    public boolean collides(int x, int y, int rotation) {
-        for (Point point : pieces[current.getPiece()][rotation]) {
-            // first we check if the piece is inside borders
-            if ((0 <= point.y + y && point.y + y < STAGESIZEY) && (0 <= point.x + x && point.x + x < STAGESIZEX)) {
-                // check for the collision with other pieces
-                if (stage[point.y + y][point.x + x] != 7) {
-                    return true;
-                }
-            } else {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public int getBackToBack() {
         return backToBack;
     }
@@ -414,7 +331,15 @@ public class GameLogic {
     public int[][] getGarbagetable() {
         return garbagetable;
     }
-    
+
+    public int getGhostHeight() {
+        int ghosty = getCurrentPiecePosition().y;
+        while (!collides(getCurrentPiecePosition().x, ghosty + 1, getCurrentPieceRotation())) {
+            ghosty++;
+        }
+        return ghosty;
+    }
+
     public int getHeldPiece() {
         return heldPiece;
     }
@@ -430,9 +355,9 @@ public class GameLogic {
     public ArrayList<Integer> getNextPieces() {
         return nextPieces;
     }
-
-    public Point[][][] getPieces() {
-        return pieces;
+    
+    public Point[] getPiece(int piece, int rotation) {
+        return pieces[piece][rotation];
     }
 
     public long getScore() {
@@ -446,7 +371,7 @@ public class GameLogic {
     public int getTimesMoved() {
         return timesMoved;
     }
-
+    
     public long getTotalGarbageReceived() {
         return totalGarbageReceived;
     }
@@ -515,9 +440,9 @@ public class GameLogic {
         setGameover(false);
         nextPieces.clear();
         setHeldPiece(-1);
-        setHeld(false);
-        setScore(0);
-        setCombo(-1);
+        held = false;
+        score = 0;
+        combo = -1;
         backToBack = -1;
 
         totalLinesCleared = 0;
@@ -531,36 +456,8 @@ public class GameLogic {
         garbageHole = (int) (Math.random() * STAGESIZEX);
 
         magicString = "";
-
         makeNextPiece();
         gameLoop();
-    }
-
-    public boolean isHeld() {
-        return held;
-    }
-
-    public boolean istSpin() {
-        return currentPieceHasSpun;
-    }
-
-    public boolean istSpinMini() {
-        return tSpinMini;
-    }
-
-    public void makeNextPiece() {
-        if (nextPieces.size() <= 7) {
-            ArrayList<Integer> bag = new ArrayList<Integer>();
-            for (int i = 0; i < 7; i++) {
-                bag.add(i);
-            }
-            Collections.shuffle(bag);
-            nextPieces.addAll(bag);
-        }
-
-        spawnPiece();
-
-        topOutCheck();
     }
 
     public boolean movePiece(int newX, int newY, int newR) {
@@ -624,7 +521,7 @@ public class GameLogic {
     public void receiveGarbage(int n) {
         garbageQueue.add(n);
     }
-
+    
     public boolean rotatePiece(int d) {
         int newRotation = (current.getRotation() + d + 4) % 4;
 
@@ -669,27 +566,15 @@ public class GameLogic {
 
         return false;
     }
-
-    public void setCombo(int combo) {
-        this.combo = combo;
-    }
-
-    public void setCurrentPieceRotation(int rotation) {
-        current.setRotation(rotation);
-    }
-
+    
     public void setGameover(boolean gameover) {
         this.gameover = gameover;
     }
-
+    
     public void setGarbageHole(int garbageHole) {
         this.garbageHole = garbageHole;
     }
 
-    private void setHeld(boolean held) {
-        this.held = held;
-    }
-    
     public void setHeldPiece(int heldPiece) {
         this.heldPiece = heldPiece;
     }
@@ -717,7 +602,7 @@ public class GameLogic {
     public void settSpin(boolean tSpin) {
         this.currentPieceHasSpun = tSpin;
     }
-
+    
     public void settSpinMini(boolean tSpinMini) {
         this.tSpinMini = tSpinMini;
     }
@@ -728,6 +613,15 @@ public class GameLogic {
 
     public void setZonelines(int zonelines) {
         this.zonelines = zonelines;
+    }
+
+    public void sonicDrop() {
+        int num = 0;
+        while (!collides(getCurrentPiecePosition().x, getCurrentPiecePosition().y + num + 1,
+                getCurrentPieceRotation())) {
+            num++;
+        }
+        movePieceRelative(0, num);
     }
 
     public void spawnPiece() {
@@ -762,6 +656,74 @@ public class GameLogic {
         score += n;
     }
 
+    private void clearLine(int line) {
+
+        for (int j = 0; j < STAGESIZEX; j++) {
+            stage[0][j] = 7;
+        }
+
+        for (int i = line; i > 0; i--) {
+            for (int j = 0; j < STAGESIZEX; j++) {
+                stage[i][j] = stage[i - 1][j];
+            }
+        }
+
+        totalLinesCleared++;
+    }
+
+    private int clearLines() {
+        int numClears = 0;
+        boolean yes;
+        for (int i = STAGESIZEY - 1; i > 0; i--) {
+            yes = true;
+            for (int j = 0; j < STAGESIZEX; j++) {
+                if (stage[i][j] == 7) {
+                    yes = false;
+                    break;
+                }
+            }
+            if (yes) {
+                clearLine(i);
+                i++;
+                numClears++;
+            }
+        }
+
+        return numClears;
+    }
+
+    private void clearLinesZone() {
+
+        boolean yes;
+        for (int i = STAGESIZEY - 1 - zonelines; i > 0; i--) {
+            yes = true;
+            for (int j = 0; j < STAGESIZEX; j++) {
+                if (stage[i][j] == 7) {
+                    yes = false;
+                    break;
+                }
+            }
+            if (yes) {
+                zonelines++;
+                clearLineZone(i);
+            }
+        }
+    }
+
+    private void clearLineZone(int line) {
+        int gap = STAGESIZEY - (line + zonelines);
+        for (int i = line; i < line + gap; i++) {
+            for (int j = 0; j < STAGESIZEX; j++) {
+                stage[i][j] = stage[i + 1][j];
+            }
+        }
+        for (int j = 0; j < STAGESIZEX; j++) {
+            stage[STAGESIZEY - zonelines][j] = 16;
+        }
+
+        magicString = zonelines + " LINES";
+    }
+
     private int clearTypeToInt(ClearType c) {
         switch(c) {
         case SINGLE:
@@ -787,6 +749,21 @@ public class GameLogic {
         default:
             return -1;
         }
+    }
+
+    private boolean collides(int x, int y, int rotation) {
+        for (Point point : pieces[current.getPiece()][rotation]) {
+            // first we check if the piece is inside borders
+            if ((0 <= point.y + y && point.y + y < STAGESIZEY) && (0 <= point.x + x && point.x + x < STAGESIZEX)) {
+                // check for the collision with other pieces
+                if (stage[point.y + y][point.x + x] != 7) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void debug(String s) {
@@ -889,6 +866,21 @@ public class GameLogic {
         return collides(current.getPosition().x, current.getPosition().y + 1, current.getRotation());
     }
 
+    private void makeNextPiece() {
+        if (nextPieces.size() <= 7) {
+            ArrayList<Integer> bag = new ArrayList<Integer>();
+            for (int i = 0; i < 7; i++) {
+                bag.add(i);
+            }
+            Collections.shuffle(bag);
+            nextPieces.addAll(bag);
+        }
+
+        spawnPiece();
+
+        topOutCheck();
+    }
+
     private void putGarbageLine(int hole) {
         for (int i = 0; i < STAGESIZEY - 1; i++) {
             for (int j = 0; j < STAGESIZEX; j++) {
@@ -945,10 +937,6 @@ public class GameLogic {
                 this.interrupt();
             }
         }.start();
-    }
-
-    private void setScore(long l) {
-        score = l;
     }
 
     private void stopZone() {
