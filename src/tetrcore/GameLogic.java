@@ -201,7 +201,7 @@ public class GameLogic {
     
     private Property gravity = new Property(1d, 30, 0.1d, 20d);
     private Property lockDelay = new Property(2d, 30, -0.02d, 0.5d);
-    private int timesMoved = 0;
+    //private int timesMoved = 0;
     private int zonelines;
 
     private boolean zone;
@@ -368,10 +368,6 @@ public class GameLogic {
         return stage;
     }
 
-    public int getTimesMoved() {
-        return timesMoved;
-    }
-    
     public long getTotalGarbageReceived() {
         return totalGarbageReceived;
     }
@@ -585,10 +581,6 @@ public class GameLogic {
 
     public void setStage(int[][] stage) {
         this.stage = stage;
-    }
-
-    public void setTimesMoved(int timesMoved) {
-        this.timesMoved = timesMoved;
     }
 
     public void setTotalLinesCleared(long totalLinesCleared) {
