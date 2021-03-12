@@ -8,7 +8,7 @@ public class Kicktable {
     0R,R0,R2,2R,2L,L2,L0,0L
     02,20,RL,LR
     To disable specific rotation (most commonly 180 rotations),
-    don't put any tests and the rotation will fail (see srs_guideline).
+    don't put any tests and the rotation will fail (compare srs_guideline and srs_guideline_180).
     Soon to be turned into a class.
      */
 

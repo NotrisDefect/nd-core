@@ -162,6 +162,7 @@ public class GameLogic {
     public static int NEXTPIECESMAX = 5;
     
     private static final int MAXIMUMMOVES = 15;
+    
     public static int getMaximummoves() {
         return MAXIMUMMOVES;
     }
@@ -517,7 +518,7 @@ public class GameLogic {
         setHeld(false);
         setScore(0);
         setCombo(-1);
-        setBackToBack(-1);
+        backToBack = -1;
 
         totalLinesCleared = 0;
         totalPiecesPlaced = 0;
@@ -564,7 +565,7 @@ public class GameLogic {
 
     public boolean movePiece(int newX, int newY, int newR) {
         if (!collides(newX, newY, newR)) {
-            setCounter(0);
+            counter = 0;
             addScore(Math.max(0, newY - current.getPosition().y));
             current.setPosition(new Point(newX, newY));
             current.setRotation(newR);
@@ -685,7 +686,7 @@ public class GameLogic {
         this.garbageHole = garbageHole;
     }
 
-    public void setHeld(boolean held) {
+    private void setHeld(boolean held) {
         this.held = held;
     }
     
@@ -805,7 +806,7 @@ public class GameLogic {
                         }
                     }
                     
-                    setCounter(getCounter() + 10);
+                    counter += 10;
 
                     try {
                         Thread.sleep(10);
@@ -881,17 +882,11 @@ public class GameLogic {
     }
 
     private boolean isOutOfBounds(int x, int y) {
-        if (y < 0 || STAGESIZEY <= y || x < 0 || STAGESIZEX <= x) {
-            return true;
-        }
-        return false;
+        return y < 0 || STAGESIZEY <= y || x < 0 || STAGESIZEX <= x;
     }
 
     private boolean isTouchingGround() {
-        if (collides(current.getPosition().x, current.getPosition().y + 1, current.getRotation())) {
-            return true;
-        }
-        return false;
+        return collides(current.getPosition().x, current.getPosition().y + 1, current.getRotation());
     }
 
     private void putGarbageLine(int hole) {
@@ -925,14 +920,6 @@ public class GameLogic {
         if (garbageRemaining > 0) {
             // TODO
         }
-    }
-
-    private void setBackToBack(int b2b) {
-        this.backToBack = b2b;
-    }
-
-    private void setCounter(double counter) {
-        this.counter = counter;
     }
 
     private void setCurrentPiece(int piece) {
