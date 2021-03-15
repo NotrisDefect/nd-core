@@ -85,7 +85,10 @@ public class GameLogic {
         public void setRotation(int rotation) {
             this.rotation = rotation;
         }
-
+        
+        public Piece() {
+            
+        }
     }
 
     class Property {
@@ -238,7 +241,7 @@ public class GameLogic {
     // private int timesMoved = 0;
     private int zoneLines;
     private boolean zone;
-    private Piece current;
+    private Piece current = new Piece();
     private int heldPiece = -1;
     private boolean held;
     private ArrayList<Integer> nextPieces = new ArrayList<Integer>();
@@ -549,6 +552,11 @@ public class GameLogic {
 
     public void setGameover(boolean gameover) {
         this.gameover = gameover;
+    }
+
+    @Deprecated
+    public void settSpin(boolean b) {
+        currentPieceHasSpun = b;
     }
 
     public void sonicDrop() {
@@ -902,7 +910,7 @@ public class GameLogic {
         }
         return false;
     }
-
+    
     private void tryToPutGarbage() {
         for (int h = 0; h < garbage.getWorkingValue(); h++) {
             if (!garbageQueue.isEmpty()) {
