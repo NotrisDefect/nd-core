@@ -13,7 +13,7 @@ public class LoadConfig {
         BufferedReader br = new BufferedReader(new InputStreamReader(file));
         GameLogic.STAGESIZEX = Integer.valueOf(br.readLine());
         GameLogic.STAGESIZEY = Integer.valueOf(br.readLine());
-        GameLogic.VISIBLEROWS = Integer.valueOf(br.readLine());
+        GameLogic.PLAYABLEROWS = Integer.valueOf(br.readLine());
         GameLogic.NEXTPIECESMAX = Integer.valueOf(br.readLine());
     }
 }

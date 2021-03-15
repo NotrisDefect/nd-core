@@ -160,30 +160,9 @@ public class GameLogic {
 
     public static int STAGESIZEX = 10;
     public static int STAGESIZEY = 40;
-    public static int VISIBLEROWS = 24;
+    public static int PLAYABLEROWS = 20;
     public static int NEXTPIECESMAX = 5;
-
-    private static final int MAXIMUMMOVES = 15;
-
-    public static int getMaximummoves() {
-        return MAXIMUMMOVES;
-    }
-
-    public static int getNEXTPIECESMAX() {
-        return NEXTPIECESMAX;
-    }
-
-    public static int getSTAGESIZEX() {
-        return STAGESIZEX;
-    }
-
-    public static int getSTAGESIZEY() {
-        return STAGESIZEY;
-    }
-
-    public static int getVISIBLEROWS() {
-        return VISIBLEROWS;
-    }
+    private static int MAXIMUMMOVES = 15;
 
     private static void debug(String s) {
     }
@@ -765,6 +744,20 @@ public class GameLogic {
         for (Point point : pieces[current.getPiece()][current.getRotation()]) {
             stage[current.getPosition().y + point.y][current.getPosition().x + point.x] = current.getPiece();
         }
+        
+        //check for too high placement
+        int fails = 0;
+        for (Point point : pieces[current.getPiece()][current.getRotation()]) {
+            if(current.getPosition().y + point.y >= STAGESIZEY - PLAYABLEROWS) {
+                break;
+            }else{
+                fails++;
+            }
+        }
+        if (fails == 4) {
+            gameover = true;
+        }
+        ///////////////////
 
         if (zone) {
             clearLinesZone();
