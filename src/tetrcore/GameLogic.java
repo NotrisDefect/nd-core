@@ -48,6 +48,10 @@ public class GameLogic {
         private Point position;
         private int rotation;
 
+        public Piece() {
+            
+        }
+
         @SuppressWarnings("unused")
         public Piece(int piece, Point position) {
             this.piece = piece;
@@ -81,13 +85,9 @@ public class GameLogic {
         public void setPosition(Point position) {
             this.position = position;
         }
-
+        
         public void setRotation(int rotation) {
             this.rotation = rotation;
-        }
-        
-        public Piece() {
-            
         }
     }
 
@@ -199,46 +199,45 @@ public class GameLogic {
     }
 
     public String magicString = "";
-
     private int magicStringsActive = 0;
+    
     private final Point[][][] pieces = Pieces.pieces;
-
     private final Point[][][] kicktable = Kicktable.kicktable_srs_guideline_180;
-
     private final int[][] garbagetable = Garbagetable.tetrio;
-    private boolean gameover = false;
 
     private ArrayList<Integer> garbageQueue = new ArrayList<Integer>();
     private int garbageHole;
-
+    
     private Property garbage = new Property(4d, 60, 0.05d, 8d);
     private Property garbageMultiplier = new Property(1d, 30, 0.1d, 8d);
-    private double counter = 0;
-
     private Property gravity = new Property(1d, 30, 0.1d, 20d);
     private Property lockDelay = new Property(2d, 30, -0.02d, 0.5d);
+
+    private Piece current = new Piece();
+    private double counter = 0;
     // private int timesMoved = 0;
+    
     private int zoneLines;
     private boolean zone;
-    private Piece current = new Piece();
+    
     private int heldPiece = -1;
     private boolean held;
+    
     private ArrayList<Integer> nextPieces = new ArrayList<Integer>();
-    private boolean currentPieceHasSpun;
-    private int ghosty;
-
-    private boolean tSpinMini;
-    private int combo;
-    private int backToBack;
-    private long score;
-
-    private long totalLinesCleared = 0;
-
-    private long totalPiecesPlaced = 0;
-
-    private long totalGarbageReceived = 0;
 
     private int[][] stage = new int[STAGESIZEY][STAGESIZEX];
+    private boolean gameover;
+    private int combo;
+    private int backToBack;
+    private long totalScore;
+    private long totalLinesCleared;
+    private long totalPiecesPlaced;
+    private long totalGarbageReceived;
+    
+    //cache
+    private int currentPieceLowestPossiblePosition;
+    private boolean currentPieceHasSpun;
+    private boolean currentPieceHasSpunMini;
 
     // turn into event
     public boolean checkTSpin() {
@@ -277,27 +276,27 @@ public class GameLogic {
 
             if (cornersFilled >= 3) {
 
-                tSpinMini = true;
+                currentPieceHasSpunMini = true;
 
                 switch (current.getRotation()) {
                 case 0:
                     if (corners[0] && corners[1]) {
-                        tSpinMini = false;
+                        currentPieceHasSpunMini = false;
                     }
                     break;
                 case 1:
                     if (corners[1] && corners[3]) {
-                        tSpinMini = false;
+                        currentPieceHasSpunMini = false;
                     }
                     break;
                 case 2:
                     if (corners[3] && corners[2]) {
-                        tSpinMini = false;
+                        currentPieceHasSpunMini = false;
                     }
                     break;
                 case 3:
                     if (corners[2] && corners[0]) {
-                        tSpinMini = false;
+                        currentPieceHasSpunMini = false;
                     }
                     break;
                 }
@@ -306,7 +305,22 @@ public class GameLogic {
         }
         return false;
     }
-
+    
+    public boolean collides(int x, int y, int rotation) {
+        for (Point point : pieces[current.getPiece()][rotation]) {
+            // first we check if the piece is inside borders
+            if ((0 <= point.y + y && point.y + y < STAGESIZEY) && (0 <= point.x + x && point.x + x < STAGESIZEX)) {
+                // check for the collision with other pieces
+                if (stage[point.y + y][point.x + x] != 7) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public int getBackToBack() {
         return backToBack;
     }
@@ -319,8 +333,16 @@ public class GameLogic {
         return counter;
     }
 
+    public Piece getCurrentPiece() {
+        return current;
+    }
+    
     public int getCurrentPieceInt() {
         return current.getPiece();
+    }
+
+    public int getCurrentPieceLowestPossiblePosition() {
+        return currentPieceLowestPossiblePosition;
     }
 
     public Point getCurrentPiecePosition() {
@@ -346,11 +368,7 @@ public class GameLogic {
     public int[][] getGarbagetable() {
         return garbagetable;
     }
-
-    public int getGhostHeight() {
-        return ghosty;
-    }
-
+    
     public int getHeldPiece() {
         return heldPiece;
     }
@@ -372,7 +390,7 @@ public class GameLogic {
     }
 
     public long getScore() {
-        return score;
+        return totalScore;
     }
 
     public int[][] getStage() {
@@ -402,7 +420,7 @@ public class GameLogic {
         }
         if (lines > 0) {
             movePieceRelative(0, +lines);
-            score += lines * 2;
+            totalScore += lines * 2;
         }
         lockPiece();
     }
@@ -423,10 +441,10 @@ public class GameLogic {
 
                 current.setPosition(new Point(3, 17));
                 current.setRotation(0);
-
+                
                 topOutCheck();
             }
-
+            calculateCurrentPieceLowestPossiblePosition();
             held = true;
             return true;
         } else {
@@ -444,7 +462,7 @@ public class GameLogic {
         nextPieces.clear();
         heldPiece = -1;
         held = false;
-        score = 0;
+        totalScore = 0;
         combo = -1;
         backToBack = -1;
 
@@ -466,11 +484,11 @@ public class GameLogic {
     public boolean movePiece(int newX, int newY, int newR) {
         if (!collides(newX, newY, newR)) {
             counter = 0;
-            score += Math.max(0, newY - current.getPosition().y);
+            totalScore += Math.max(0, newY - current.getPosition().y);
             current.setPosition(new Point(newX, newY));
             current.setRotation(newR);
             currentPieceHasSpun = false;
-            calculateGhostHeight();
+            calculateCurrentPieceLowestPossiblePosition();
             return true;
         }
         return false;
@@ -552,25 +570,25 @@ public class GameLogic {
         magicString = "Zone activated";
     }
 
-    private void calculateGhostHeight() {
+    private void calculateCurrentPieceLowestPossiblePosition() {
         Point position = current.getPosition();
-        int calc = position.y;
-        while (!collides(position.x, calc + 1, current.getRotation())) {
-            calc++;
+        int result = position.y;
+        while (!collides(position.x, result + 1, current.getRotation())) {
+            result++;
         }
-        ghosty = calc;
+        currentPieceLowestPossiblePosition = result;
     }
 
     private void clearLine(int line) {
-
-        for (int j = 0; j < STAGESIZEX; j++) {
-            stage[0][j] = 7;
-        }
 
         for (int i = line; i > 0; i--) {
             for (int j = 0; j < STAGESIZEX; j++) {
                 stage[i][j] = stage[i - 1][j];
             }
+        }
+        
+        for (int j = 0; j < STAGESIZEX; j++) {
+            stage[0][j] = 7;
         }
 
         totalLinesCleared++;
@@ -656,21 +674,6 @@ public class GameLogic {
         }
     }
 
-    private boolean collides(int x, int y, int rotation) {
-        for (Point point : pieces[current.getPiece()][rotation]) {
-            // first we check if the piece is inside borders
-            if ((0 <= point.y + y && point.y + y < STAGESIZEY) && (0 <= point.x + x && point.x + x < STAGESIZEX)) {
-                // check for the collision with other pieces
-                if (stage[point.y + y][point.x + x] != 7) {
-                    return true;
-                }
-            } else {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void gameLoop() {
 
         new Thread() {
@@ -716,11 +719,11 @@ public class GameLogic {
             return ClearType.TRIPLE;
         } else if (lines == 4 && currentPieceHasSpun == false) {
             return ClearType.QUAD;
-        } else if (lines == 1 && currentPieceHasSpun == true && tSpinMini == true) {
+        } else if (lines == 1 && currentPieceHasSpun == true && currentPieceHasSpunMini == true) {
             return ClearType.SPIN_MINI_SINGLE;
         } else if (lines == 1 && currentPieceHasSpun == true) {
             return ClearType.SPIN_SINGLE;
-        } else if (lines == 2 && currentPieceHasSpun == true && tSpinMini == true) {
+        } else if (lines == 2 && currentPieceHasSpun == true && currentPieceHasSpunMini == true) {
             return ClearType.SPIN_MINI_DOUBLE;
         } else if (lines == 2 && currentPieceHasSpun == true) {
             return ClearType.SPIN_DOUBLE;
@@ -780,7 +783,7 @@ public class GameLogic {
                 setMagicString((intToPieceName(current.getPiece()) + "-" + getClearType(linesCleared).getDescription())
                         .toUpperCase());
 
-                score += getClearType(linesCleared).getScore();
+                totalScore += getClearType(linesCleared).getScore();
             } else {
                 combo = -1;
                 tryToPutGarbage();
@@ -873,7 +876,7 @@ public class GameLogic {
         nextPieces.remove(0);
         held = false;
         currentPieceHasSpun = false;
-        calculateGhostHeight();
+        calculateCurrentPieceLowestPossiblePosition();
     }
 
     private void stopZone() {
