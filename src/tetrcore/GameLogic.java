@@ -49,7 +49,7 @@ public class GameLogic {
         private int rotation;
 
         public Piece() {
-            
+
         }
 
         @SuppressWarnings("unused")
@@ -85,7 +85,7 @@ public class GameLogic {
         public void setPosition(Point position) {
             this.position = position;
         }
-        
+
         public void setRotation(int rotation) {
             this.rotation = rotation;
         }
@@ -200,14 +200,14 @@ public class GameLogic {
 
     public String magicString = "";
     private int magicStringsActive = 0;
-    
+
     private final Point[][][] pieces = Pieces.pieces;
     private final Point[][][] kicktable = Kicktable.kicktable_srs_guideline_180;
     private final int[][] garbagetable = Garbagetable.tetrio;
 
     private ArrayList<Integer> garbageQueue = new ArrayList<Integer>();
     private int garbageHole;
-    
+
     private Property garbage = new Property(4d, 60, 0.05d, 8d);
     private Property garbageMultiplier = new Property(1d, 30, 0.1d, 8d);
     private Property gravity = new Property(1d, 30, 0.1d, 20d);
@@ -216,13 +216,13 @@ public class GameLogic {
     private Piece current = new Piece();
     private double counter = 0;
     // private int timesMoved = 0;
-    
+
     private int zoneLines;
     private boolean zone;
-    
+
     private int heldPiece = -1;
     private boolean held;
-    
+
     private ArrayList<Integer> nextPieces = new ArrayList<Integer>();
 
     private int[][] stage = new int[STAGESIZEY][STAGESIZEX];
@@ -233,8 +233,8 @@ public class GameLogic {
     private long totalLinesCleared;
     private long totalPiecesPlaced;
     private long totalGarbageReceived;
-    
-    //cache
+
+    // cache
     private int currentPieceLowestPossiblePosition;
     private boolean currentPieceHasSpun;
     private boolean currentPieceHasSpunMini;
@@ -305,7 +305,7 @@ public class GameLogic {
         }
         return false;
     }
-    
+
     public boolean collides(int x, int y, int rotation) {
         for (Point point : pieces[current.getPiece()][rotation]) {
             // first we check if the piece is inside borders
@@ -320,7 +320,7 @@ public class GameLogic {
         }
         return false;
     }
-    
+
     public int getBackToBack() {
         return backToBack;
     }
@@ -336,7 +336,7 @@ public class GameLogic {
     public Piece getCurrentPiece() {
         return current;
     }
-    
+
     public int getCurrentPieceInt() {
         return current.getPiece();
     }
@@ -368,7 +368,7 @@ public class GameLogic {
     public int[][] getGarbagetable() {
         return garbagetable;
     }
-    
+
     public int getHeldPiece() {
         return heldPiece;
     }
@@ -441,7 +441,7 @@ public class GameLogic {
 
                 current.setPosition(new Point(3, 17));
                 current.setRotation(0);
-                
+
                 topOutCheck();
             }
             calculateCurrentPieceLowestPossiblePosition();
@@ -586,7 +586,7 @@ public class GameLogic {
                 stage[i][j] = stage[i - 1][j];
             }
         }
-        
+
         for (int j = 0; j < STAGESIZEX; j++) {
             stage[0][j] = 7;
         }
@@ -747,13 +747,13 @@ public class GameLogic {
         for (Point point : pieces[current.getPiece()][current.getRotation()]) {
             stage[current.getPosition().y + point.y][current.getPosition().x + point.x] = current.getPiece();
         }
-        
-        //check for too high placement
+
+        // check for too high placement
         int fails = 0;
         for (Point point : pieces[current.getPiece()][current.getRotation()]) {
-            if(current.getPosition().y + point.y >= STAGESIZEY - PLAYABLEROWS) {
+            if (current.getPosition().y + point.y >= STAGESIZEY - PLAYABLEROWS) {
                 break;
-            }else{
+            } else {
                 fails++;
             }
         }
@@ -840,8 +840,12 @@ public class GameLogic {
         }
 
         if (garbageRemaining > 0) {
-            // TODO
+            sendGarbageEvent(n);
         }
+    }
+    
+    public void sendGarbageEvent(int n) {
+        
     }
 
     private void setCurrentPiece(int piece) {
@@ -906,7 +910,7 @@ public class GameLogic {
         }
         return false;
     }
-    
+
     private void tryToPutGarbage() {
         for (int h = 0; h < garbage.getWorkingValue(); h++) {
             if (!garbageQueue.isEmpty()) {
