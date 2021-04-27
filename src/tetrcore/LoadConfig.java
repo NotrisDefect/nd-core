@@ -11,9 +11,9 @@ public class LoadConfig {
     
     public static void load() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(file));
-        GameLogic.STAGESIZEX = Integer.valueOf(br.readLine());
-        GameLogic.STAGESIZEY = Integer.valueOf(br.readLine());
-        GameLogic.PLAYABLEROWS = Integer.valueOf(br.readLine());
-        GameLogic.NEXTPIECESMAX = Integer.valueOf(br.readLine());
+        GameLogic.STAGESIZEX = Integer.parseInt(br.readLine());
+        GameLogic.STAGESIZEY = Integer.parseInt(br.readLine());
+        GameLogic.PLAYABLEROWS = Integer.parseInt(br.readLine());
+        GameLogic.NEXTPIECESMAX = Integer.parseInt(br.readLine());
     }
 }

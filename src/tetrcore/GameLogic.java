@@ -1,231 +1,56 @@
 package tetrcore;
 
-import java.awt.Point;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class GameLogic {
+public abstract class GameLogic {
     /*
-     * abcd abcd abc1 xabc ab1d xabd ab11 xxab a1cd xacd a1c1 xxac a11d xxad a111
-     * xxxa 1bcd xbcd 1bc1 xxbc 1b1d xxbd 1b11 xxxb 11cd xxcd 11c1 xxxc 111d xxxd
-     * 1111 xxxx
+    abcd abcd
+    abc1 xabc
+    ab1d xabd
+    ab11 xxab
+    a1cd xacd
+    a1c1 xxac
+    a11d xxad
+    a111 xxxa
+    1bcd xbcd
+    1bc1 xxbc
+    1b1d xxbd
+    1b11 xxxb
+    11cd xxcd
+    11c1 xxxc
+    111d xxxd
+    1111 xxxx
      */
 
-    private enum ClearType {
-        SINGLE(100, "Single"), DOUBLE(300, "Double"), TRIPLE(500, "Triple"), QUAD(800, "Quad"),
-        SPIN_MINI(100, "Spin Mini"), SPIN(400, "Spin"), SPIN_MINI_SINGLE(200, "Spin Mini Single"),
-        SPIN_SINGLE(800, "Spin Single"), SPIN_MINI_DOUBLE(400, "Spin Mini Double"), SPIN_DOUBLE(1200, "Spin Double"),
-        SPIN_TRIPLE(1600, "Spin Triple"), SPIN_QUAD(2600, "Spin Quad"), COMBO(50), ALL_CLEAR(3500, "All Clear"), SD(1),
-        HD(2);
-
-        private final int score;
-        private final String description;
-
-        ClearType(int score) {
-            this.score = score;
-            this.description = null;
-        }
-
-        ClearType(int score, String description) {
-            this.score = score;
-            this.description = description;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public int getScore() {
-            return score;
-        }
-
-    }
-
-    private class Piece {
-        private int piece;
-        private Point position;
-        private int rotation;
-
-        public Piece() {
-
-        }
-
-        @SuppressWarnings("unused")
-        public Piece(int piece, Point position) {
-            this.piece = piece;
-            this.position = position;
-            this.rotation = 0;
-        }
-
-        @SuppressWarnings("unused")
-        public Piece(int piece, Point position, int rotation) {
-            this.piece = piece;
-            this.position = position;
-            this.rotation = rotation;
-        }
-
-        public int getPiece() {
-            return piece;
-        }
-
-        public Point getPosition() {
-            return position;
-        }
-
-        public int getRotation() {
-            return rotation;
-        }
-
-        public void setPiece(int piece) {
-            this.piece = piece;
-        }
-
-        public void setPosition(Point position) {
-            this.position = position;
-        }
-
-        public void setRotation(int rotation) {
-            this.rotation = rotation;
-        }
-    }
-
-    class Property {
-        private double base;
-        private int delay;
-        private double delta;
-        private boolean mode;
-        private double limit;
-
-        private double workingValue;
-
-        private Property(double base, int delay, double delta, double limit) {
-            this.base = base;
-            this.delay = delay;
-            this.delta = delta;
-            if (delta > 0) {
-                mode = true;
-            } else {
-                mode = false;
-            }
-            this.limit = limit;
-        }
-
-        private int getIncreaseDelay() {
-            return delay;
-        }
-
-        private double getLimit() {
-            return limit;
-        }
-
-        private double getWorkingValue() {
-            return workingValue;
-        }
-
-        private void start() {
-            workingValue = base;
-
-            Timer timer = new Timer();
-
-            TimerTask task = new TimerTask() {
-                @Override
-                public void run() {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            while (mode ? (getWorkingValue() < getLimit()) : (getLimit() < getWorkingValue())) {
-                                tick();
-                                try {
-                                    Thread.sleep(1000);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            workingValue = limit;
-                        }
-                    }).start();
-                }
-            };
-
-            timer.schedule(task, getIncreaseDelay() * 1000);
-        }
-
-        private void tick() {
-            workingValue += delta;
-        }
-
-    }
-
+    // private static final int MAXIMUMMOVES = 15;
     public static int STAGESIZEX = 10;
     public static int STAGESIZEY = 40;
     public static int PLAYABLEROWS = 20;
     public static int NEXTPIECESMAX = 5;
-    private static int MAXIMUMMOVES = 15;
-
-    private static void debug(String s) {
-    }
-
-    private static String intToPieceName(int p) {
-        switch (p) {
-        case 0:
-            return "z";
-        case 1:
-            return "l";
-        case 2:
-            return "o";
-        case 3:
-            return "s";
-        case 4:
-            return "i";
-        case 5:
-            return "j";
-        case 6:
-            return "t";
-        case 7:
-            return "_";
-        case 8:
-            return "#";
-        case 16:
-            return "w";
-        default:
-            return null;
-        }
-    }
-
-    private static boolean isOutOfBounds(int x, int y) {
-        return y < 0 || STAGESIZEY <= y || x < 0 || STAGESIZEX <= x;
-    }
-
-    public String magicString = "";
-    private int magicStringsActive = 0;
-
     private final Point[][][] pieces = Pieces.pieces;
     private final Point[][][] kicktable = Kicktable.kicktable_srs_guideline_180;
     private final int[][] garbagetable = Garbagetable.tetrio;
-
-    private ArrayList<Integer> garbageQueue = new ArrayList<Integer>();
+    private final ArrayList<Integer> garbageQueue = new ArrayList<>();
+    private final Property garbage = new Property(4d, 60, 0.05d, 8d);
+    private final Property garbageMultiplier = new Property(1d, 30, 0.1d, 8d);
+    private final Property gravity = new Property(1d, 30, 0.1d, 20d);
+    private final Property lockDelay = new Property(2d, 30, -0.02d, 0.5d);
+    private final Piece current = new Piece();
+    private final ArrayList<Integer> nextPieces = new ArrayList<>();
+    private final int[][] stage = new int[STAGESIZEY][STAGESIZEX];
+    public String magicString = "";
+    private int magicStringsActive = 0;
     private int garbageHole;
-
-    private Property garbage = new Property(4d, 60, 0.05d, 8d);
-    private Property garbageMultiplier = new Property(1d, 30, 0.1d, 8d);
-    private Property gravity = new Property(1d, 30, 0.1d, 20d);
-    private Property lockDelay = new Property(2d, 30, -0.02d, 0.5d);
-
-    private Piece current = new Piece();
     private double counter = 0;
-    // private int timesMoved = 0;
-
     private int zoneLines;
     private boolean zone;
-
     private int heldPiece = -1;
     private boolean held;
-
-    private ArrayList<Integer> nextPieces = new ArrayList<Integer>();
-
-    private int[][] stage = new int[STAGESIZEY][STAGESIZEX];
+    // private int timesMoved = 0;
     private boolean gameover;
     private int combo;
     private int backToBack;
@@ -233,16 +58,50 @@ public class GameLogic {
     private long totalLinesCleared;
     private long totalPiecesPlaced;
     private long totalGarbageReceived;
-
     // cache
     private int currentPieceLowestPossiblePosition;
     private boolean currentPieceHasSpun;
     private boolean currentPieceHasSpunMini;
 
+    private static void debug(String s) {
+
+    }
+
+    private static String intToPieceName(int p) {
+        switch (p) {
+            case 0:
+                return "z";
+            case 1:
+                return "l";
+            case 2:
+                return "o";
+            case 3:
+                return "s";
+            case 4:
+                return "i";
+            case 5:
+                return "j";
+            case 6:
+                return "t";
+            case 7:
+                return "_";
+            case 8:
+                return "#";
+            case 16:
+                return "w";
+            default:
+                return null;
+        }
+    }
+
+    private static boolean isOutOfBounds(int x, int y) {
+        return y < 0 || STAGESIZEY <= y || x < 0 || STAGESIZEX <= x;
+    }
+
     // turn into event
     public boolean checkTSpin() {
         if (current.getPiece() == 6) {
-            boolean corners[] = { true, true, true, true };
+            boolean[] corners = {true, true, true, true};
             if (!isOutOfBounds(current.getPosition().x, current.getPosition().y)) {
                 if (stage[current.getPosition().y][current.getPosition().x] == 7) {
                     corners[0] = false;
@@ -269,7 +128,7 @@ public class GameLogic {
 
             int cornersFilled = 0;
             for (int i = 0; i < 4; i++) {
-                if (corners[i] == true) {
+                if (corners[i]) {
                     cornersFilled++;
                 }
             }
@@ -279,26 +138,26 @@ public class GameLogic {
                 currentPieceHasSpunMini = true;
 
                 switch (current.getRotation()) {
-                case 0:
-                    if (corners[0] && corners[1]) {
-                        currentPieceHasSpunMini = false;
-                    }
-                    break;
-                case 1:
-                    if (corners[1] && corners[3]) {
-                        currentPieceHasSpunMini = false;
-                    }
-                    break;
-                case 2:
-                    if (corners[3] && corners[2]) {
-                        currentPieceHasSpunMini = false;
-                    }
-                    break;
-                case 3:
-                    if (corners[2] && corners[0]) {
-                        currentPieceHasSpunMini = false;
-                    }
-                    break;
+                    case 0:
+                        if (corners[0] && corners[1]) {
+                            currentPieceHasSpunMini = false;
+                        }
+                        break;
+                    case 1:
+                        if (corners[1] && corners[3]) {
+                            currentPieceHasSpunMini = false;
+                        }
+                        break;
+                    case 2:
+                        if (corners[3] && corners[2]) {
+                            currentPieceHasSpunMini = false;
+                        }
+                        break;
+                    case 3:
+                        if (corners[2] && corners[0]) {
+                            currentPieceHasSpunMini = false;
+                        }
+                        break;
                 }
                 return true;
             }
@@ -337,6 +196,10 @@ public class GameLogic {
         return current;
     }
 
+    private void setCurrentPiece(int piece) {
+        current.setPiece(piece);
+    }
+
     public int getCurrentPieceInt() {
         return current.getPiece();
     }
@@ -357,6 +220,10 @@ public class GameLogic {
         return gameover;
     }
 
+    public void setGameover(boolean gameover) {
+        this.gameover = gameover;
+    }
+
     public int getGarbageHole() {
         return garbageHole;
     }
@@ -375,6 +242,27 @@ public class GameLogic {
 
     public String getMagicString() {
         return magicString;
+    }
+
+    private void setMagicString(String s) {
+        new Thread() {
+            @Override
+            public void run() {
+                magicStringsActive++;
+                magicString = s + " " + combo + " combo";
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                if (magicStringsActive == 1) {
+                    magicString = "";
+                }
+                magicStringsActive--;
+                this.interrupt();
+            }
+        }.start();
     }
 
     public int getMagicStringsActive() {
@@ -420,7 +308,7 @@ public class GameLogic {
         }
         if (lines > 0) {
             movePieceRelative(0, +lines);
-            totalScore += lines * 2;
+            totalScore += lines * 2L;
         }
         lockPiece();
     }
@@ -547,10 +435,6 @@ public class GameLogic {
         return false;
     }
 
-    public void setGameover(boolean gameover) {
-        this.gameover = gameover;
-    }
-
     @Deprecated
     public void settSpin(boolean b) {
         currentPieceHasSpun = b;
@@ -570,6 +454,12 @@ public class GameLogic {
         magicString = "Zone activated";
     }
 
+    public abstract void whatWhenSendGarbage(int n);
+
+    public void onLineClearEvent(int row, int[] content) {
+
+    }
+
     private void calculateCurrentPieceLowestPossiblePosition() {
         Point position = current.getPosition();
         int result = position.y;
@@ -581,10 +471,10 @@ public class GameLogic {
 
     private void clearLine(int line) {
 
+        onLineClearEvent(line, stage[line].clone());
+
         for (int i = line; i > 0; i--) {
-            for (int j = 0; j < STAGESIZEX; j++) {
-                stage[i][j] = stage[i - 1][j];
-            }
+            if (STAGESIZEX >= 0) System.arraycopy(stage[i - 1], 0, stage[i], 0, STAGESIZEX);
         }
 
         for (int j = 0; j < STAGESIZEX; j++) {
@@ -592,6 +482,7 @@ public class GameLogic {
         }
 
         totalLinesCleared++;
+
     }
 
     private int clearLines() {
@@ -636,9 +527,7 @@ public class GameLogic {
     private void clearLineZone(int line) {
         int gap = STAGESIZEY - (line + zoneLines);
         for (int i = line; i < line + gap; i++) {
-            for (int j = 0; j < STAGESIZEX; j++) {
-                stage[i][j] = stage[i + 1][j];
-            }
+            if (STAGESIZEX >= 0) System.arraycopy(stage[i + 1], 0, stage[i], 0, STAGESIZEX);
         }
         for (int j = 0; j < STAGESIZEX; j++) {
             stage[STAGESIZEY - zoneLines][j] = 16;
@@ -649,60 +538,57 @@ public class GameLogic {
 
     private int clearTypeToInt(ClearType c) {
         switch (c) {
-        case SINGLE:
-            return 0;
-        case DOUBLE:
-            return 1;
-        case TRIPLE:
-            return 2;
-        case QUAD:
-            return 3;
-        case SPIN_MINI_SINGLE:
-            return 4;
-        case SPIN_SINGLE:
-            return 5;
-        case SPIN_MINI_DOUBLE:
-            return 6;
-        case SPIN_DOUBLE:
-            return 7;
-        case SPIN_TRIPLE:
-            return 8;
-        case SPIN_QUAD:
-            return 9;
-        default:
-            return -1;
+            case SINGLE:
+                return 0;
+            case DOUBLE:
+                return 1;
+            case TRIPLE:
+                return 2;
+            case QUAD:
+                return 3;
+            case SPIN_MINI_SINGLE:
+                return 4;
+            case SPIN_SINGLE:
+                return 5;
+            case SPIN_MINI_DOUBLE:
+                return 6;
+            case SPIN_DOUBLE:
+                return 7;
+            case SPIN_TRIPLE:
+                return 8;
+            case SPIN_QUAD:
+                return 9;
+            default:
+                return -1;
         }
     }
 
     private void gameLoop() {
 
-        new Thread() {
-            @Override
-            public void run() {
-                while (!gameover) {
-                    // long timeStart = System.nanoTime();
-                    if (counter >= (isTouchingGround() ? lockDelay.getWorkingValue() * 1000
-                            : (Math.pow(gravity.getWorkingValue(), -1) * 1000))) {
-                        if (!movePieceRelative(0, +1)) {
-                            lockPiece();
-                        }
+        new Thread(() -> {
+            while (!gameover) {
+                // long timeStart = System.nanoTime();
+                if (counter >= (isTouchingGround() ? lockDelay.getWorkingValue() * 1000
+                        : (Math.pow(gravity.getWorkingValue(), -1) * 1000))) {
+                    if (!movePieceRelative(0, +1)) {
+                        lockPiece();
                     }
-
-                    counter += 10;
-
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    // long timeEnd = System.nanoTime();
-
-                    // long timeElapsed = timeEnd - timeStart;
-                    // System.out.println((float)timeElapsed/1000000 + " ms");
                 }
+
+                counter += 10;
+
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                // long timeEnd = System.nanoTime();
+
+                // long timeElapsed = timeEnd - timeStart;
+                // System.out.println((float)timeElapsed/1000000 + " ms");
             }
-        }.start();
+        }).start();
 
         gravity.start();
         garbage.start();
@@ -711,28 +597,49 @@ public class GameLogic {
     }
 
     private ClearType getClearType(int lines) {
-        if (lines == 1 && currentPieceHasSpun == false) {
-            return ClearType.SINGLE;
-        } else if (lines == 2 && currentPieceHasSpun == false) {
-            return ClearType.DOUBLE;
-        } else if (lines == 3 && currentPieceHasSpun == false) {
-            return ClearType.TRIPLE;
-        } else if (lines == 4 && currentPieceHasSpun == false) {
-            return ClearType.QUAD;
-        } else if (lines == 1 && currentPieceHasSpun == true && currentPieceHasSpunMini == true) {
-            return ClearType.SPIN_MINI_SINGLE;
-        } else if (lines == 1 && currentPieceHasSpun == true) {
-            return ClearType.SPIN_SINGLE;
-        } else if (lines == 2 && currentPieceHasSpun == true && currentPieceHasSpunMini == true) {
-            return ClearType.SPIN_MINI_DOUBLE;
-        } else if (lines == 2 && currentPieceHasSpun == true) {
-            return ClearType.SPIN_DOUBLE;
-        } else if (lines == 3 && currentPieceHasSpun == true) {
-            return ClearType.SPIN_TRIPLE;
-        } else if (lines == 4 && currentPieceHasSpun == true) {
-            return ClearType.SPIN_QUAD;
-        } else {
-            return null;
+        switch (lines) {
+            case 1:
+                if (currentPieceHasSpun) {
+                    if (currentPieceHasSpunMini) {
+                        return ClearType.SPIN_MINI_SINGLE;
+                    } else {
+                        return ClearType.SPIN_SINGLE;
+                    }
+                } else {
+                    return ClearType.SINGLE;
+                }
+            case 2:
+                if (currentPieceHasSpun) {
+                    if (currentPieceHasSpunMini) {
+                        return ClearType.SPIN_MINI_DOUBLE;
+                    } else {
+                        return ClearType.SPIN_DOUBLE;
+                    }
+                } else {
+                    return ClearType.DOUBLE;
+                }
+            case 3:
+                if (currentPieceHasSpun) {
+                    if (currentPieceHasSpunMini) {
+                        return null;
+                    } else {
+                        return ClearType.SPIN_TRIPLE;
+                    }
+                } else {
+                    return ClearType.TRIPLE;
+                }
+            case 4:
+                if (currentPieceHasSpun) {
+                    if (currentPieceHasSpunMini) {
+                        return null;
+                    } else {
+                        return ClearType.SPIN_QUAD;
+                    }
+                } else {
+                    return ClearType.QUAD;
+                }
+            default:
+                return null;
         }
     }
 
@@ -798,7 +705,7 @@ public class GameLogic {
 
     private void makeNextPiece() {
         if (nextPieces.size() <= 7) {
-            ArrayList<Integer> bag = new ArrayList<Integer>();
+            ArrayList<Integer> bag = new ArrayList<>();
             for (int i = 0; i < 7; i++) {
                 bag.add(i);
             }
@@ -813,9 +720,7 @@ public class GameLogic {
 
     private void putGarbageLine() {
         for (int i = 0; i < STAGESIZEY - 1; i++) {
-            for (int j = 0; j < STAGESIZEX; j++) {
-                stage[i][j] = stage[i + 1][j];
-            }
+            if (STAGESIZEX >= 0) System.arraycopy(stage[i + 1], 0, stage[i], 0, STAGESIZEX);
         }
         for (int j = 0; j < STAGESIZEX; j++) {
             if (j == garbageHole) {
@@ -840,37 +745,8 @@ public class GameLogic {
         }
 
         if (garbageRemaining > 0) {
-            sendGarbageEvent(n);
+            whatWhenSendGarbage(n);
         }
-    }
-    
-    public void sendGarbageEvent(int n) {
-        
-    }
-
-    private void setCurrentPiece(int piece) {
-        current.setPiece(piece);
-    }
-
-    private void setMagicString(String s) {
-        new Thread() {
-            @Override
-            public void run() {
-                magicStringsActive++;
-                magicString = s + " " + combo + " combo";
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                if (magicStringsActive == 1) {
-                    magicString = "";
-                }
-                magicStringsActive--;
-                this.interrupt();
-            }
-        }.start();
     }
 
     private void spawnPiece() {
@@ -923,5 +799,154 @@ public class GameLogic {
                 }
             }
         }
+    }
+
+    private enum ClearType {
+        SINGLE(100, "Single"),
+        DOUBLE(300, "Double"),
+        TRIPLE(500, "Triple"),
+        QUAD(800, "Quad"),
+        SPIN_MINI(100, "Spin Mini"),
+        SPIN(400, "Spin"),
+        SPIN_MINI_SINGLE(200, "Spin Mini Single"),
+        SPIN_SINGLE(800, "Spin Single"),
+        SPIN_MINI_DOUBLE(400, "Spin Mini Double"),
+        SPIN_DOUBLE(1200, "Spin Double"),
+        SPIN_TRIPLE(1600, "Spin Triple"),
+        SPIN_QUAD(2600, "Spin Quad"),
+        COMBO(50),
+        ALL_CLEAR(3500, "All Clear"),
+        SD(1),
+        HD(2);
+
+        private final int score;
+        private final String description;
+
+        ClearType(int score) {
+            this.score = score;
+            this.description = null;
+        }
+
+        ClearType(int score, String description) {
+            this.score = score;
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public int getScore() {
+            return score;
+        }
+
+    }
+
+    private static class Piece {
+        private int piece;
+        private Point position;
+        private int rotation;
+
+        public Piece() {
+
+        }
+
+        @SuppressWarnings("unused")
+        public Piece(int piece, Point position) {
+            this.piece = piece;
+            this.position = position;
+            this.rotation = 0;
+        }
+
+        @SuppressWarnings("unused")
+        public Piece(int piece, Point position, int rotation) {
+            this.piece = piece;
+            this.position = position;
+            this.rotation = rotation;
+        }
+
+        public int getPiece() {
+            return piece;
+        }
+
+        public void setPiece(int piece) {
+            this.piece = piece;
+        }
+
+        public Point getPosition() {
+            return position;
+        }
+
+        public void setPosition(Point position) {
+            this.position = position;
+        }
+
+        public int getRotation() {
+            return rotation;
+        }
+
+        public void setRotation(int rotation) {
+            this.rotation = rotation;
+        }
+    }
+
+    private static class Property {
+        private final double base;
+        private final int delay;
+        private final double delta;
+        private final boolean mode;
+        private final double limit;
+
+        private double workingValue;
+
+        private Property(double base, int delay, double delta, double limit) {
+            this.base = base;
+            this.delay = delay;
+            this.delta = delta;
+            mode = delta > 0;
+            this.limit = limit;
+        }
+
+        private int getIncreaseDelay() {
+            return delay;
+        }
+
+        private double getLimit() {
+            return limit;
+        }
+
+        private double getWorkingValue() {
+            return workingValue;
+        }
+
+        private void start() {
+            workingValue = base;
+
+            Timer timer = new Timer();
+
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                    new Thread(() -> {
+                        while (mode ? (getWorkingValue() < getLimit()) : (getLimit() < getWorkingValue())) {
+                            tick();
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        workingValue = limit;
+                    }).start();
+                }
+            };
+
+            timer.schedule(task, getIncreaseDelay() * 1000L);
+        }
+
+        private void tick() {
+            workingValue += delta;
+        }
+
     }
 }
