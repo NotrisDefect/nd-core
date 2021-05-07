@@ -1,9 +1,9 @@
 package tetrcore;
 
-import java.awt.Point;
+import java.awt.*;
 
-public class Pieces {
-    public static final Point[][][] pieces = {
+public class PieceSet {
+    public static final PieceSet srs = new PieceSet(new Point[][][]{
         //Rotations: 0,R,2,L
         //Z
         {
@@ -55,5 +55,35 @@ public class Pieces {
             {new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(1, 2)},
             {new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(1, 2)}
         }
-    };
+    });
+    private static final int PIECES = 7;
+    private static final int ROTATIONS = 4;
+    private static final int POINTS = 4;
+    private final Point[][][] pieces;
+
+    public PieceSet(Point[][][] pieces) {
+        this.pieces = pieces;
+        if (!isValid()) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    public Point[] getPiece(int piece, int rotation) {
+        return pieces[piece][rotation];
+    }
+
+    private boolean isValid() {
+        if (pieces.length == PIECES) {
+            for (int i = 0; i < PIECES; i++) {
+                if (pieces[i].length == ROTATIONS) {
+                    for (int j = 0; j < ROTATIONS; j++) {
+                        if (pieces[i][j].length == POINTS) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }

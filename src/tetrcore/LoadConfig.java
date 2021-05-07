@@ -6,9 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class LoadConfig {
-    
+
     static InputStream file = LoadConfig.class.getResourceAsStream("config.txt");
-    
+
     public static void load() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(file));
         GameLogic.STAGESIZEX = Integer.parseInt(br.readLine());
