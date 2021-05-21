@@ -1,27 +1,25 @@
 package tetrcore;
 
-import java.awt.*;
-
 public class Piece {
     private int pieceNumber;
-    private int x;
-    private int y;
+    private Integer x;
+    private Integer y;
     private int rotation;
 
     public Piece(int pieceNumber) {
-        this(pieceNumber, null);
+        this(pieceNumber, null, null);
     }
 
     @SuppressWarnings("unused")
-    public Piece(int pieceNumber, Point position) {
-        this(pieceNumber, position, 0);
+    public Piece(int pieceNumber, Integer x, Integer y) {
+        this(pieceNumber, x, y, 0);
     }
 
     @SuppressWarnings("unused")
-    public Piece(int pieceNumber, Point position, int rotation) {
+    public Piece(int pieceNumber, Integer x, Integer y, int rotation) {
         this.pieceNumber = pieceNumber;
-        this.x = position.x;
-        this.y = position.y;
+        this.x = x;
+        this.y = y;
         this.rotation = rotation;
     }
 

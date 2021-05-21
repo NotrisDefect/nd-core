@@ -1,8 +1,9 @@
 package tetrcore;
 
-import java.awt.*;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -24,7 +25,7 @@ public abstract class GameLogic {
     11c1 xxxc
     111d xxxd
     1111 xxxx
-     */
+    */
 
     // private static final int MAXIMUMMOVES = 15;
     public static int STAGESIZEX = 10;
@@ -32,8 +33,8 @@ public abstract class GameLogic {
     public static int PLAYABLEROWS = 20;
     public static int NEXTPIECESMAX = 5;
     private final PieceSet pieceSet = PieceSet.srs;
-    private final Point[][][] kicktable = Kicktable.kicktable_srs_guideline_180;
-    private final int[][] garbagetable = Garbagetable.tetrio;
+    private final Kicktable kicktable = Kicktable.kicktable_srs_guideline_180;
+    private final Garbagetable garbagetable = Garbagetable.tetrio;
     private final ArrayList<Integer> garbageQueue = new ArrayList<>();
     private final Property garbage = new Property(4d, 60, 0.05d, 8d);
     private final Property garbageMultiplier = new Property(1d, 30, 0.1d, 8d);
@@ -62,9 +63,10 @@ public abstract class GameLogic {
     private int currentPieceLowestPossiblePosition;
     private boolean currentPieceHasSpun;
     private boolean currentPieceHasSpunMini;
+    private Random garbageRandomizer;
+    private Random pieceRandomizer;
 
     private static void debug(String s) {
-
     }
 
     private static String intToPieceName(int p) {
@@ -98,7 +100,9 @@ public abstract class GameLogic {
         return y >= 0 && STAGESIZEY > y && x >= 0 && STAGESIZEX > x;
     }
 
-    public void extAbort() {
+    // -external <do> <what> [how] [extra]
+
+    public void extAbortGame() {
         gameover();
     }
 
@@ -106,12 +110,36 @@ public abstract class GameLogic {
         receiveGarbage(n);
     }
 
-    public void extHardDropPiece() {
+    public void extDropPieceHard() {
         hardDropPiece();
+    }
+
+    public void extDropPieceSoft() {
+        movePieceRelative(0, 1);
+    }
+
+    public void extDropPieceSoftMax() {
+        sonicDrop();
     }
 
     public void extHoldPiece() {
         holdPiece();
+    }
+
+    public void extMovePieceLeft() {
+        movePieceRelative(-1, 0);
+    }
+
+    public void extMovePieceLeftMax() {
+
+    }
+
+    public void extMovePieceRight() {
+        movePieceRelative(1, 0);
+    }
+
+    public void extMovePieceRightMax() {
+
     }
 
     public void extRotatePiece180() {
@@ -126,11 +154,16 @@ public abstract class GameLogic {
         rotatePiece(1);
     }
 
-    public void extSoftDropPiece() {
-        sonicDrop();
+    public void extStartGame() {
+        long seed = (long) (Math.random() * Long.MAX_VALUE);
+        pieceRandomizer = new Random(seed);
+        garbageRandomizer = new Random(seed);
+        initGame();
     }
 
-    public void extStart() {
+    public void extStartGame(long seed) {
+        pieceRandomizer = new Random(seed);
+        garbageRandomizer = new Random(seed);
         initGame();
     }
 
@@ -173,10 +206,6 @@ public abstract class GameLogic {
 
     public ArrayList<Integer> getGarbageQueue() {
         return garbageQueue;
-    }
-
-    public int[][] getGarbagetable() {
-        return garbagetable;
     }
 
     public int getHeldPiece() {
@@ -243,6 +272,8 @@ public abstract class GameLogic {
     public abstract void whatWhenGameover();
 
     public abstract void whatWhenLineClear(int row, int[] content);
+
+    public abstract void whatWhenPerfectClear();
 
     public abstract void whatWhenSendGarbage(int n);
 
@@ -316,6 +347,7 @@ public abstract class GameLogic {
                         }
                         break;
                 }
+                currentPieceHasSpun = true;
                 whatWhenSpin();
             }
         }
@@ -396,7 +428,7 @@ public abstract class GameLogic {
                 return 1;
             case TRIPLE:
                 return 2;
-            case QUAD:
+            case LONG:
                 return 3;
             case SPIN_MINI_SINGLE:
                 return 4;
@@ -408,7 +440,7 @@ public abstract class GameLogic {
                 return 7;
             case SPIN_TRIPLE:
                 return 8;
-            case SPIN_QUAD:
+            case SPIN_LONG:
                 return 9;
             default:
                 return -1;
@@ -504,10 +536,10 @@ public abstract class GameLogic {
                     if (currentPieceHasSpunMini) {
                         return ScoreType.WTF;
                     } else {
-                        return ScoreType.SPIN_QUAD;
+                        return ScoreType.SPIN_LONG;
                     }
                 } else {
-                    return ScoreType.QUAD;
+                    return ScoreType.LONG;
                 }
             default:
                 return ScoreType.WTF;
@@ -537,7 +569,7 @@ public abstract class GameLogic {
             } else {
                 // swap
                 temp = current.getPieceNumber();
-                current = new Piece(heldPiece, new Point(3, 17), 0);
+                current = new Piece(heldPiece, 3, 17, 0);
                 heldPiece = temp;
             }
             calculateCurrentPieceLowestPossiblePosition();
@@ -571,7 +603,7 @@ public abstract class GameLogic {
         zoneLines = 0;
 
         garbageQueue.clear();
-        garbageHole = (int) (Math.random() * STAGESIZEX);
+        garbageHole = garbageRandomizer.nextInt(STAGESIZEX);
 
         magicString = "";
         makeNextPiece();
@@ -612,18 +644,14 @@ public abstract class GameLogic {
             if (linesCleared > 0) {
                 combo++;
 
-                if ((totalLinesCleared - totalGarbageReceived) * STAGESIZEX + totalGarbageReceived == totalPiecesPlaced
-                    * 4) {
-
-                    sendGarbage((int) ((garbagetable[clearTypeToInt(getClearType(linesCleared))][combo] + 10)
-                        * garbageMultiplier.getWorkingValue()));
-                } else {
-                    sendGarbage((int) (garbagetable[clearTypeToInt(getClearType(linesCleared))][combo]
-                        * garbageMultiplier.getWorkingValue()));
+                if ((totalLinesCleared - totalGarbageReceived) * STAGESIZEX + totalGarbageReceived == totalPiecesPlaced * 4) {
+                    sendGarbage(10);
+                    whatWhenPerfectClear();
                 }
+                sendGarbage((int) (garbagetable.get(clearTypeToInt(getClearType(linesCleared)), combo) * garbageMultiplier.getWorkingValue()));
 
-                setMagicString((intToPieceName(current.getPieceNumber()) + "-" + getClearType(linesCleared).getDescription())
-                    .toUpperCase());
+
+                setMagicString((intToPieceName(current.getPieceNumber()) + "-" + getClearType(linesCleared).getDescription()).toUpperCase());
 
                 totalScore += getClearType(linesCleared).getScore();
             } else {
@@ -644,7 +672,7 @@ public abstract class GameLogic {
             for (int i = 0; i < 7; i++) {
                 bag.add(i);
             }
-            Collections.shuffle(bag);
+            Collections.shuffle(bag, pieceRandomizer);
             for (Integer i : bag) {
                 nextPieces.add(new Piece(i));
             }
@@ -695,20 +723,21 @@ public abstract class GameLogic {
     private boolean rotatePiece(int d) {
         int oldRotation = current.getRotation();
         int newRotation = (current.getRotation() + d + 4) % 4;
+        int piece = current.getPieceNumber();
 
-        int special;
+        int state;
 
         switch (oldRotation) {
             case 0:
                 switch (newRotation) {
                     case 1:
-                        special = 0;
+                        state = 0;
                         break;
                     case 2:
-                        special = 8;
+                        state = 8;
                         break;
                     case 3:
-                        special = 7;
+                        state = 7;
                         break;
                     default:
                         return false;
@@ -717,13 +746,13 @@ public abstract class GameLogic {
             case 1:
                 switch (newRotation) {
                     case 0:
-                        special = 1;
+                        state = 1;
                         break;
                     case 2:
-                        special = 2;
+                        state = 2;
                         break;
                     case 3:
-                        special = 10;
+                        state = 10;
                         break;
                     default:
                         return false;
@@ -732,13 +761,13 @@ public abstract class GameLogic {
             case 2:
                 switch (newRotation) {
                     case 0:
-                        special = 9;
+                        state = 9;
                         break;
                     case 1:
-                        special = 3;
+                        state = 3;
                         break;
                     case 3:
-                        special = 4;
+                        state = 4;
                         break;
                     default:
                         return false;
@@ -747,13 +776,13 @@ public abstract class GameLogic {
             case 3:
                 switch (newRotation) {
                     case 0:
-                        special = 6;
+                        state = 6;
                         break;
                     case 1:
-                        special = 11;
+                        state = 11;
                         break;
                     case 2:
-                        special = 5;
+                        state = 5;
                         break;
                     default:
                         return false;
@@ -763,13 +792,8 @@ public abstract class GameLogic {
                 return false;
         }
 
-        int pieceType = current.getPieceNumber() == 4 ? 1 : 0;
-
-        int maxtries = kicktable[pieceType][special].length;
-
-        for (int tries = 0; tries < maxtries; tries++) {
-            if (movePiece(current.getX() + kicktable[pieceType][special][tries].x,
-                current.getY() - kicktable[pieceType][special][tries].y, newRotation)) {
+        for (int tries = 0; tries < kicktable.maxTries(piece, state); tries++) {
+            if (movePiece(current.getX() + kicktable.getX(piece, state, tries), current.getY() - kicktable.getY(piece, state, tries), newRotation)) {
                 checkTSpin();
                 return true;
             }
@@ -784,7 +808,7 @@ public abstract class GameLogic {
             garbageQueue.set(0, garbageQueue.get(0) - 1);
             if (garbageQueue.get(0) == 0) {
                 garbageQueue.remove(0);
-                garbageHole = (int) (Math.random() * STAGESIZEX);
+                garbageHole = garbageRandomizer.nextInt(STAGESIZEX);
             }
             garbageRemaining--;
         }
@@ -804,7 +828,7 @@ public abstract class GameLogic {
     }
 
     private void spawnPiece() {
-        current = new Piece(nextPieces.get(0).getPieceNumber(), new Point(3, 17), 0);
+        current = new Piece(nextPieces.get(0).getPieceNumber(), 3, 17, 0);
         nextPieces.remove(0);
         held = false;
         currentPieceHasSpun = false;
@@ -850,7 +874,7 @@ public abstract class GameLogic {
                 garbageQueue.set(0, garbageQueue.get(0) - 1);
                 if (garbageQueue.get(0) == 0) {
                     garbageQueue.remove(0);
-                    garbageHole = (int) (Math.random() * STAGESIZEX);
+                    garbageHole = garbageRandomizer.nextInt(STAGESIZEX);
                 }
             }
         }
@@ -860,7 +884,7 @@ public abstract class GameLogic {
         SINGLE(100, "Single"),
         DOUBLE(300, "Double"),
         TRIPLE(500, "Triple"),
-        QUAD(800, "Quad"),
+        LONG(800, "Long"),
         SPIN_MINI(100, "Spin Mini"),
         SPIN(400, "Spin"),
         SPIN_MINI_SINGLE(200, "Spin Mini Single"),
@@ -868,7 +892,7 @@ public abstract class GameLogic {
         SPIN_MINI_DOUBLE(400, "Spin Mini Double"),
         SPIN_DOUBLE(1200, "Spin Double"),
         SPIN_TRIPLE(1600, "Spin Triple"),
-        SPIN_QUAD(2600, "Spin Quad"),
+        SPIN_LONG(2600, "Spin Long"),
         COMBO(50, "Combo"),
         ALL_CLEAR(3500, "All Clear"),
         SD(1, "Soft Drop"),

@@ -1,6 +1,6 @@
 package tetrcore;
 
-import java.awt.*;
+import java.awt.Point;
 
 public class PieceSet {
     public static final PieceSet srs = new PieceSet(new Point[][][]{
@@ -56,6 +56,7 @@ public class PieceSet {
             {new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(1, 2)}
         }
     });
+
     private static final int PIECES = 7;
     private static final int ROTATIONS = 4;
     private static final int POINTS = 4;
