@@ -2,21 +2,19 @@ package tetrcore;
 
 public class Piece {
     private int pieceNumber;
-    private Integer x;
-    private Integer y;
+    private int x;
+    private int y;
     private int rotation;
 
     public Piece(int pieceNumber) {
-        this(pieceNumber, null, null);
+        this(pieceNumber, 0, 0);
     }
 
-    @SuppressWarnings("unused")
-    public Piece(int pieceNumber, Integer x, Integer y) {
+    public Piece(int pieceNumber, int x, int y) {
         this(pieceNumber, x, y, 0);
     }
 
-    @SuppressWarnings("unused")
-    public Piece(int pieceNumber, Integer x, Integer y, int rotation) {
+    public Piece(int pieceNumber, int x, int y, int rotation) {
         this.pieceNumber = pieceNumber;
         this.x = x;
         this.y = y;
