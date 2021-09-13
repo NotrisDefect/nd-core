@@ -1,9 +1,9 @@
-package tetrcore;
+package cabbageroll.notrisdefect.core.tables;
 
 import java.awt.Point;
 
-public class PieceSet {
-    public static final PieceSet srs = new PieceSet(new Point[][][]{
+public class PieceTable {
+    public static final PieceTable srs = new PieceTable(new Point[][][]{
         //Rotations: 0,R,2,L
         //Z
         {
@@ -62,7 +62,7 @@ public class PieceSet {
     private static final int POINTS = 4;
     private final Point[][][] pieces;
 
-    public PieceSet(Point[][][] pieces) {
+    public PieceTable(Point[][][] pieces) {
         this.pieces = pieces;
         if (!isValid()) {
             throw new IllegalArgumentException();

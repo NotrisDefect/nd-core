@@ -1,9 +1,9 @@
-package tetrcore;
+package cabbageroll.notrisdefect.core.tables;
 
 import java.awt.Point;
 
-public class Kicktable {
-    public static final Kicktable kicktable_srs_tetrio = new Kicktable(new Point[][][]{
+public class KickTable {
+    public static final KickTable KICK_TABLE_SRS_TETRIO = new KickTable(new Point[][][]{
         {//J, L, S, T, Z Tetromino Wall Kick Data
 
             {new Point(0, 0), new Point(-1, 0), new Point(-1, +1), new Point(0, -2), new Point(-1, -2)},
@@ -45,7 +45,7 @@ public class Kicktable {
             {new Point(0, 0), new Point(-1, 0)},
         }
     });
-    public static final Kicktable kicktable_srs_guideline = new Kicktable(new Point[][][]{
+    public static final KickTable KICK_TABLE_SRS_GUIDELINE = new KickTable(new Point[][][]{
         {//J, L, S, T, Z Tetromino Wall Kick Data
 
             {new Point(0, 0), new Point(-1, 0), new Point(-1, +1), new Point(0, -2), new Point(-1, -2)},
@@ -87,7 +87,7 @@ public class Kicktable {
             {},
         }
     });
-    public static final Kicktable kicktable_srs_guideline_180 = new Kicktable(new Point[][][]{
+    public static final KickTable KICK_TABLE_SRS_GUIDELINE_180 = new KickTable(new Point[][][]{
         {//J, L, S, T, Z Tetromino Wall Kick Data
 
             {new Point(0, 0), new Point(-1, 0), new Point(-1, +1), new Point(0, -2), new Point(-1, -2)},
@@ -139,7 +139,7 @@ public class Kicktable {
     */
     private final Point[][][] kicks;
 
-    public Kicktable(Point[][][] kicks) {
+    public KickTable(Point[][][] kicks) {
         this.kicks = kicks;
     }
 

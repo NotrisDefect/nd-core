@@ -1,4 +1,4 @@
-package tetrcore;
+package cabbageroll.notrisdefect.core;
 
 public class Piece {
     private int pieceNumber;
