@@ -87,7 +87,7 @@ public class KickTable {
             {},
         }
     });
-    public static final KickTable KICK_TABLE_SRS_GUIDELINE_180 = new KickTable(new Point[][][]{
+    public static final KickTable SRS_180 = new KickTable(new Point[][][]{
         {//J, L, S, T, Z Tetromino Wall Kick Data
 
             {new Point(0, 0), new Point(-1, 0), new Point(-1, +1), new Point(0, -2), new Point(-1, -2)},

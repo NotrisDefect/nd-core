@@ -1,17 +1,18 @@
 package cabbageroll.notrisdefect.core;
 
 public class Piece {
+
     private int pieceNumber;
     private int x;
     private int y;
     private int rotation;
 
-    public Piece(int pieceNumber) {
-        this(pieceNumber, 0, 0);
+    public Piece(Piece p) {
+        this(p.getPieceNumber());
     }
 
-    public Piece(int pieceNumber, int x, int y) {
-        this(pieceNumber, x, y, 0);
+    public Piece(int pieceNumber) {
+        this(pieceNumber, 3, 17, 0);
     }
 
     public Piece(int pieceNumber, int x, int y, int rotation) {
@@ -52,4 +53,5 @@ public class Piece {
     public void setY(int y) {
         this.y = y;
     }
+
 }

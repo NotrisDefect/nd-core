@@ -5,7 +5,7 @@ public class GarbageTable {
     // mini spin
     // spin
 
-    public static final GarbageTable tetrio = new GarbageTable(new int[][]{
+    public static final GarbageTable TETRIO = new GarbageTable(new int[][]{
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3},
         {1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6},

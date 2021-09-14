@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public abstract class GameLogic {
+
     /*
     abcd abcd
     abc1 xabc
@@ -43,99 +44,63 @@ public abstract class GameLogic {
     public static final byte SPIN_MINI = 1;
     public static final byte SPIN_FULL = 2;
 
+    public static final int TPS = 20;
     private static final byte[][] STATES = {
         {-1, 0, 8, 7},
         {1, -1, 2, 10},
         {9, 3, -1, 4},
         {6, 11, 5, -1},
     };
-
-    public static int STAGESIZEX = 10;
-    public static int STAGESIZEY = 40;
-    public static int PLAYABLEROWS = 20;
-    public static int NEXTPIECESMAX = 5;
-    public static int TPS = 20;
-
-    private final PieceTable pieceTable = PieceTable.srs;
-    private final KickTable kickTable = KickTable.KICK_TABLE_SRS_GUIDELINE_180;
-    private final GarbageTable garbageTable = GarbageTable.tetrio;
-    private final ScoreTable scoreTable = ScoreTable.normal;
-
-    private final Property garbage = new Property(4d, 60 * TPS, 0.05d, 8d);
-    private final Property garbageMultiplier = new Property(1d, 30 * TPS, 0.1d, 8d);
-    private final Property gravity = new Property(1d, 30 * TPS, 0.1d, 20d);
-    private final Property lockDelay = new Property(2d, 30 * TPS, -0.02d, 0.5d);
-
-    private final ArrayList garbageQueue = new ArrayList();
-    private final int[][] stage = new int[STAGESIZEY][STAGESIZEX];
-    public String magicString = "";
+    private static final int BAG_SIZE = 7;
+    private final PieceTable pieceTable = PieceTable.GUIDELINE;
+    private final KickTable kickTable = KickTable.SRS_180;
+    private final GarbageTable garbageTable = GarbageTable.TETRIO;
+    private final ScoreTable scoreTable = ScoreTable.NORMAL;
+    private final Property garbageCap = new Property(4d, 60, 0.05d, 8d);
+    private final Property garbageMultiplier = new Property(1d, 30, 0.1d, 8d);
+    private final Property gravity = new Property(1d, 30, 0.1d, 20d);
+    private final Property lockDelay = new Property(2d, 30, -0.02d, 0.5d);
+    private int STAGESIZEX = 10;
+    private int STAGESIZEY = 40;
+    private int PLAYABLEROWS = 20;
+    private int NEXTPIECESMAX = 5;
+    private Random garbageRandomizer;
+    private Random pieceRandomizer;
+    private boolean dead;
+    private int[][] stage;
+    private Piece current;
     private Piece[] nextPieces;
     private int nextPiecesLeft;
-    private Piece current;
-    private long ticksPassed;
-    private int magicStringsActive = 0;
+    private Piece heldPiece;
+    private boolean held;
+    private ArrayList garbageQueue;
     private int garbageHole;
     private double counter;
+    private double limit;
     private int zoneLines;
     private boolean zone;
-    private int heldPiece;
-    private boolean held;
-    private boolean dead;
     private int combo;
     private int backToBack;
-
+    private long ticksPassed;
     private long totalScore;
     private long totalLinesCleared;
     private long totalPiecesPlaced;
     private long totalGarbageReceived;
-
-    private int currentPieceLowestPossiblePosition;
+    private long totalGarbageSent;
+    private int lowestPossiblePosition;
     private int spinState;
-
-    private Random garbageRandomizer;
-    private Random pieceRandomizer;
-
-    private static char convIntToPieceName(int p) {
-        switch (p) {
-            case PIECE_Z:
-                return 'Z';
-            case PIECE_L:
-                return 'L';
-            case PIECE_O:
-                return 'O';
-            case PIECE_S:
-                return 'S';
-            case PIECE_I:
-                return 'I';
-            case PIECE_J:
-                return 'J';
-            case PIECE_T:
-                return 'T';
-            case PIECE_NONE:
-                return '_';
-            case PIECE_GARBAGE:
-                return '#';
-            case PIECE_ZONE:
-                return 'W';
-            default:
-                return '?';
-        }
-    }
-
-    private static void debug(String s) {
-    }
 
     public abstract void evtGameover();
 
     public abstract void evtLineClear(int row, int[] content);
+
+    public abstract void evtLockPiece(Piece piece, int linesCleared, int spinState, int combo, int backToBack);
 
     public abstract void evtPerfectClear();
 
     public abstract void evtSendGarbage(int n);
 
     public abstract void evtSpin();
-
-    // -external <do> <what> [how] [extra]
 
     public final void extAbortGame() {
         die();
@@ -151,6 +116,7 @@ public abstract class GameLogic {
 
     public final void extDropPieceSoft() {
         movePieceRelative(0, 1);
+        totalScore += Math.max(0, scoreTable.getSoftDrop());
     }
 
     public final void extDropPieceSoftMax() {
@@ -168,6 +134,8 @@ public abstract class GameLogic {
     public final void extMovePieceLeftMax() {
         dasLeft();
     }
+
+    // -external <do> <what> [how] [extra]
 
     public final void extMovePieceRight() {
         movePieceRelative(1, 0);
@@ -207,10 +175,6 @@ public abstract class GameLogic {
         tick();
     }
 
-    public Point[] genPiece(int piece, int rotation) {
-        return pieceTable.getPiece(piece, rotation);
-    }
-
     public int getBackToBack() {
         return backToBack;
     }
@@ -227,10 +191,6 @@ public abstract class GameLogic {
         return current;
     }
 
-    public int getCurrentPieceLowestPossiblePosition() {
-        return currentPieceLowestPossiblePosition;
-    }
-
     public int getGarbageHole() {
         return garbageHole;
     }
@@ -239,43 +199,56 @@ public abstract class GameLogic {
         return garbageQueue;
     }
 
-    public int getHeldPiece() {
+    public Piece getHeldPiece() {
         return heldPiece;
     }
 
-    public String getMagicString() {
-        return magicString;
+    public double getLimit() {
+        return limit;
     }
 
-    private void setMagicString(final String s) {
-        new Thread() {
-            public void run() {
-                magicStringsActive++;
-                magicString = s + " " + combo + " combo";
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                if (magicStringsActive == 1) {
-                    magicString = "";
-                }
-                magicStringsActive--;
-                this.interrupt();
-            }
-        }.start();
+    public int getLowestPossiblePosition() {
+        return lowestPossiblePosition;
     }
 
-    public int getMagicStringsActive() {
-        return magicStringsActive;
+    public int getNEXTPIECESMAX() {
+        return NEXTPIECESMAX;
+    }
+
+    public void setNEXTPIECESMAX(int NEXTPIECESMAX) {
+        this.NEXTPIECESMAX = NEXTPIECESMAX;
     }
 
     public Piece[] getNextPieces() {
         return nextPieces;
     }
 
-    public long getScore() {
-        return totalScore;
+    public int getPLAYABLEROWS() {
+        return PLAYABLEROWS;
+    }
+
+    public void setPLAYABLEROWS(int PLAYABLEROWS) {
+        this.PLAYABLEROWS = PLAYABLEROWS;
+    }
+
+    public Point[] getPoints(int piece, int rotation) {
+        return pieceTable.getPiece(piece, rotation);
+    }
+
+    public int getSTAGESIZEX() {
+        return STAGESIZEX;
+    }
+
+    public void setSTAGESIZEX(int STAGESIZEX) {
+        this.STAGESIZEX = STAGESIZEX;
+    }
+
+    public int getSTAGESIZEY() {
+        return STAGESIZEY;
+    }
+
+    public void setSTAGESIZEY(int STAGESIZEY) {
+        this.STAGESIZEY = STAGESIZEY;
     }
 
     public int[][] getStage() {
@@ -290,12 +263,20 @@ public abstract class GameLogic {
         return totalGarbageReceived;
     }
 
+    public long getTotalGarbageSent() {
+        return totalGarbageSent;
+    }
+
     public long getTotalLinesCleared() {
         return totalLinesCleared;
     }
 
     public long getTotalPiecesPlaced() {
         return totalPiecesPlaced;
+    }
+
+    public long getTotalScore() {
+        return totalScore;
     }
 
     public int getZonelines() {
@@ -311,7 +292,7 @@ public abstract class GameLogic {
         while (!isColliding(current.getX(), result + 1, current.getRotation())) {
             result++;
         }
-        currentPieceLowestPossiblePosition = result;
+        lowestPossiblePosition = result;
     }
 
     private void checkTSpin() {
@@ -417,8 +398,6 @@ public abstract class GameLogic {
         for (int j = 0; j < STAGESIZEX; j++) {
             stage[STAGESIZEY - zoneLines][j] = 16;
         }
-
-        magicString = zoneLines + " LINES";
     }
 
     private int clearLines() {
@@ -490,67 +469,66 @@ public abstract class GameLogic {
         }
         if (lines > 0) {
             movePieceRelative(0, +lines);
-            totalScore += lines * 2L;
+            totalScore += lines * scoreTable.getHardDrop();
         }
         lockPiece();
     }
 
     private void holdPiece() {
         if (!held) {
-            int temp;
-
-            // if first hold
-            if (heldPiece == PIECE_NONE) {
-                heldPiece = current.getPieceNumber();
+            if (heldPiece == null) {
+                heldPiece = new Piece(current);
                 makeNextPiece();
             } else {
-                // swap
-                temp = current.getPieceNumber();
-                current = new Piece(heldPiece, 3, 17, 0);
+                Piece temp = new Piece(current);
+                current = heldPiece;
                 heldPiece = temp;
+                calcCurrentPieceLowestPossiblePosition();
+                checkTopOut();
             }
-            calcCurrentPieceLowestPossiblePosition();
             held = true;
-            checkTopOut();
         }
     }
 
     private void initGame() {
+        dead = false;
+        stage = new int[STAGESIZEY][STAGESIZEX];
         for (int i = 0; i < STAGESIZEY; i++) {
             for (int j = 0; j < STAGESIZEX; j++) {
                 stage[i][j] = PIECE_NONE;
             }
         }
-        dead = false;
-        nextPieces = new Piece[14];
+
+        nextPieces = new Piece[NEXTPIECESMAX + BAG_SIZE];
         nextPiecesLeft = 0;
-        heldPiece = PIECE_NONE;
+
+        heldPiece = null;
         held = false;
-        totalScore = 0;
-        combo = -1;
-        backToBack = -1;
+
+        garbageQueue = new ArrayList();
+        garbageHole = garbageRandomizer.nextInt(STAGESIZEX);
+
         counter = 0;
 
+        zoneLines = 0;
+        zone = false;
+
+        combo = -1;
+        backToBack = -1;
+
+        ticksPassed = 0;
+        totalScore = 0;
         totalLinesCleared = 0;
         totalPiecesPlaced = 0;
         totalGarbageReceived = 0;
+        totalGarbageSent = 0;
 
-        zone = false;
-        zoneLines = 0;
+        gravity.reset();
+        garbageCap.reset();
+        garbageMultiplier.reset();
+        lockDelay.reset();
 
-        garbageQueue.clear();
-        garbageHole = garbageRandomizer.nextInt(STAGESIZEX);
-
-        magicString = "";
         makeNextPiece();
-
-        ticksPassed = 0;
-
-        gravity.start();
-        garbage.start();
-        garbageMultiplier.start();
-        lockDelay.start();
-
     }
 
     private void instantSoftDrop() {
@@ -587,21 +565,6 @@ public abstract class GameLogic {
         return isColliding(current.getX(), current.getY() + 1, current.getRotation());
     }
 
-    private String linesToString(int lines) {
-        switch (lines) {
-            case 1:
-                return "SINGLE";
-            case 2:
-                return "DOUBLE";
-            case 3:
-                return "TRIPLE";
-            case 4:
-                return "NOTRIS";
-            default:
-                return "";
-        }
-    }
-
     private void lockPiece() {
         Point[] temp;
 
@@ -632,6 +595,7 @@ public abstract class GameLogic {
         if (zone) {
             clearLinesZone();
         } else {
+
             int linesCleared = clearLines();
 
             if (linesCleared > 0) {
@@ -639,20 +603,25 @@ public abstract class GameLogic {
 
                 if ((totalLinesCleared - totalGarbageReceived) * STAGESIZEX + totalGarbageReceived == totalPiecesPlaced * 4) {
                     sendGarbage(10);
-                    totalScore += 3500;
+                    totalScore += scoreTable.getAllClear();
                     evtPerfectClear();
                 }
                 sendGarbage((int) (garbageTable.get(linesCleared, spinState, combo) * garbageMultiplier.getWorkingValue()));
 
-                setMagicString((convIntToPieceName(current.getPieceNumber()) + " " + spinToString(spinState) + " " + linesToString(linesCleared)));
+                if (linesCleared == 4 || spinState != SPIN_NONE) {
+                    backToBack++;
+                } else {
+                    backToBack = -1;
+                }
 
-                totalScore += scoreTable.get(linesCleared, spinState);
+                totalScore += scoreTable.get(linesCleared, spinState) * scoreTable.getB2bMulti() * (backToBack > 0 ? 1 : 0) + combo * scoreTable.getCombo();
+
             } else {
                 combo = -1;
                 tryToPutGarbage();
             }
 
-            debug("tspin=" + spinState + ";combo=" + combo + ";linescleared=" + linesCleared);
+            evtLockPiece(current, linesCleared, spinState, combo, backToBack);
 
         }
 
@@ -660,16 +629,16 @@ public abstract class GameLogic {
     }
 
     private void makeNextPiece() {
-        if (nextPiecesLeft <= 7) {
-            int[] bag = new int[7];
-            for (int i = 0; i < 7; i++) {
+        while (nextPiecesLeft <= NEXTPIECESMAX) {
+            int[] bag = new int[BAG_SIZE];
+            for (int i = 0; i < BAG_SIZE; i++) {
                 bag[i] = i;
             }
             shuffleArray(bag);
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < BAG_SIZE; i++) {
                 nextPieces[nextPiecesLeft + i] = new Piece(bag[i]);
             }
-            nextPiecesLeft += 7;
+            nextPiecesLeft += BAG_SIZE;
         }
 
         spawnPiece();
@@ -680,12 +649,12 @@ public abstract class GameLogic {
     private boolean movePiece(int newX, int newY, int newR) {
         if (!isColliding(newX, newY, newR)) {
             counter = 0;
-            totalScore += Math.max(0, newY - current.getY());
             current.setX(newX);
             current.setY(newY);
             current.setRotation(newR);
             spinState = SPIN_NONE;
             calcCurrentPieceLowestPossiblePosition();
+            limit = isTouchingGround() ? lockDelay.getWorkingValue() : (Math.pow(gravity.getWorkingValue(), -1));
             return true;
         }
         return false;
@@ -693,34 +662,6 @@ public abstract class GameLogic {
 
     private boolean movePieceRelative(int xOffset, int yOffset) {
         return movePiece(current.getX() + xOffset, current.getY() + yOffset, current.getRotation());
-    }
-
-    private void primitiveGameLoop() {
-        new Thread() {
-            public void run() {
-                while (!dead) {
-                    if (counter >= (isTouchingGround() ? lockDelay.getWorkingValue() * 1000 : (Math.pow(gravity.getWorkingValue(), -1) * 1000))) {
-                        if (!movePieceRelative(0, +1)) {
-                            lockPiece();
-                        }
-                    }
-
-                    counter += 10;
-
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                evtGameover();
-            }
-        }.start();
-
-        gravity.start();
-        garbage.start();
-        garbageMultiplier.start();
-        lockDelay.start();
     }
 
     private void putGarbageLine() {
@@ -769,6 +710,7 @@ public abstract class GameLogic {
         }
 
         if (garbageRemaining > 0) {
+            totalGarbageSent += n;
             evtSendGarbage(n);
         }
     }
@@ -784,28 +726,16 @@ public abstract class GameLogic {
     }
 
     private void spawnPiece() {
-        current = new Piece(nextPieces[0].getPieceNumber(), 3, 17, 0);
-        System.arraycopy(nextPieces, 1, nextPieces, 0, 13);
+        current = nextPieces[0];
+        System.arraycopy(nextPieces, 1, nextPieces, 0, nextPieces.length - 1);
         nextPiecesLeft--;
         held = false;
         spinState = SPIN_NONE;
         calcCurrentPieceLowestPossiblePosition();
     }
 
-    private String spinToString(int spin) {
-        switch (spin) {
-            case SPIN_MINI:
-                return "SPIN MINI";
-            case SPIN_FULL:
-                return "SPIN";
-            default:
-                return "";
-        }
-    }
-
     private void startZone() {
         zone = true;
-        magicString = "Zone activated";
     }
 
     private void stopZone() {
@@ -824,23 +754,25 @@ public abstract class GameLogic {
 
     private void tick() {
         ticksPassed++;
-        if (counter >= (isTouchingGround() ? lockDelay.getWorkingValue() * 1000 : (Math.pow(gravity.getWorkingValue(), -1) * 1000))) {
+
+        counter += 1 / (double) TPS;
+
+        if (counter >= limit) {
             if (!movePieceRelative(0, +1)) {
                 lockPiece();
             }
         }
+
         if (ticksPassed % TPS == 0) {
             gravity.tick(ticksPassed);
-            garbage.tick(ticksPassed);
+            garbageCap.tick(ticksPassed);
             garbageMultiplier.tick(ticksPassed);
             lockDelay.tick(ticksPassed);
         }
-
-        counter += 10;
     }
 
     private void tryToPutGarbage() {
-        for (int h = 0; h < garbage.getWorkingValue(); h++) {
+        for (int h = 0; h < garbageCap.getWorkingValue(); h++) {
             if (!garbageQueue.isEmpty()) {
                 putGarbageLine();
 
@@ -875,7 +807,7 @@ public abstract class GameLogic {
         }
 
         public void tick(long n) {
-            if (n > delay) {
+            if (n > delay * TPS) {
                 if (mode ? (getWorkingValue() < getLimit()) : (getLimit() < getWorkingValue())) {
                     workingValue += delta;
                 } else {
@@ -896,7 +828,7 @@ public abstract class GameLogic {
             return workingValue;
         }
 
-        private void start() {
+        private void reset() {
             workingValue = base;
         }
 

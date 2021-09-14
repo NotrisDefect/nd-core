@@ -3,7 +3,7 @@ package cabbageroll.notrisdefect.core.tables;
 import java.awt.Point;
 
 public class PieceTable {
-    public static final PieceTable srs = new PieceTable(new Point[][][]{
+    public static final PieceTable GUIDELINE = new PieceTable(new Point[][][]{
         //Rotations: 0,R,2,L
         //Z
         {
