@@ -52,41 +52,54 @@ public abstract class GameLogic {
         {6, 11, 5, -1},
     };
     private static final int BAG_SIZE = 7;
+
     private final PieceTable pieceTable = PieceTable.GUIDELINE;
     private final KickTable kickTable = KickTable.SRS_180;
     private final GarbageTable garbageTable = GarbageTable.TETRIO;
     private final ScoreTable scoreTable = ScoreTable.NORMAL;
+
     private final Property garbageCap = new Property(4d, 60, 0.05d, 8d);
-    private final Property garbageMultiplier = new Property(1d, 30, 0.1d, 8d);
+    private final Property garbageMultiplier = new Property(1d, 30, 0.02d, 2d);
     private final Property gravity = new Property(1d, 30, 0.1d, 20d);
-    private final Property lockDelay = new Property(2d, 30, -0.02d, 0.5d);
-    private int STAGESIZEX = 10;
-    private int STAGESIZEY = 40;
-    private int PLAYABLEROWS = 20;
-    private int NEXTPIECESMAX = 5;
+    private final Property lockDelay = new Property(2d, 60, -0.02d, 0.5d);
+
+    protected int STAGESIZEX = 10;
+    protected int STAGESIZEY = 40;
+    protected int PLAYABLEROWS = 20;
+    protected int NEXTPIECESMAX = 5;
+
     private Random garbageRandomizer;
     private Random pieceRandomizer;
-    private boolean dead;
+
+    private boolean dead = true;
     private int[][] stage;
     private Piece current;
+
     private Piece[] nextPieces;
     private int nextPiecesLeft;
+
     private Piece heldPiece;
     private boolean held;
+
     private ArrayList garbageQueue;
     private int garbageHole;
+
     private double counter;
     private double limit;
+
     private int zoneLines;
     private boolean zone;
+
     private int combo;
     private int backToBack;
+
     private long ticksPassed;
     private long totalScore;
     private long totalLinesCleared;
     private long totalPiecesPlaced;
     private long totalGarbageReceived;
     private long totalGarbageSent;
+
     private int lowestPossiblePosition;
     private int spinState;
 
@@ -211,44 +224,12 @@ public abstract class GameLogic {
         return lowestPossiblePosition;
     }
 
-    public int getNEXTPIECESMAX() {
-        return NEXTPIECESMAX;
-    }
-
-    public void setNEXTPIECESMAX(int NEXTPIECESMAX) {
-        this.NEXTPIECESMAX = NEXTPIECESMAX;
-    }
-
     public Piece[] getNextPieces() {
         return nextPieces;
     }
 
-    public int getPLAYABLEROWS() {
-        return PLAYABLEROWS;
-    }
-
-    public void setPLAYABLEROWS(int PLAYABLEROWS) {
-        this.PLAYABLEROWS = PLAYABLEROWS;
-    }
-
     public Point[] getPoints(int piece, int rotation) {
         return pieceTable.getPiece(piece, rotation);
-    }
-
-    public int getSTAGESIZEX() {
-        return STAGESIZEX;
-    }
-
-    public void setSTAGESIZEX(int STAGESIZEX) {
-        this.STAGESIZEX = STAGESIZEX;
-    }
-
-    public int getSTAGESIZEY() {
-        return STAGESIZEY;
-    }
-
-    public void setSTAGESIZEY(int STAGESIZEY) {
-        this.STAGESIZEY = STAGESIZEY;
     }
 
     public int[][] getStage() {
@@ -376,7 +357,7 @@ public abstract class GameLogic {
 
     private void clearLine(int line) {
 
-        evtLineClear(line, stage[line]);
+        evtLineClear(line, (int[]) stage[line].clone());
 
         for (int i = line; i > 0; i--) {
             System.arraycopy(stage[i - 1], 0, stage[i], 0, STAGESIZEX);
@@ -396,7 +377,7 @@ public abstract class GameLogic {
             System.arraycopy(stage[i + 1], 0, stage[i], 0, STAGESIZEX);
         }
         for (int j = 0; j < STAGESIZEX; j++) {
-            stage[STAGESIZEY - zoneLines][j] = 16;
+            stage[STAGESIZEY - zoneLines][j] = PIECE_ZONE;
         }
     }
 
@@ -469,7 +450,7 @@ public abstract class GameLogic {
         }
         if (lines > 0) {
             movePieceRelative(0, +lines);
-            totalScore += lines * scoreTable.getHardDrop();
+            totalScore += (long) lines * scoreTable.getHardDrop();
         }
         lockPiece();
     }
@@ -484,6 +465,8 @@ public abstract class GameLogic {
                 current = heldPiece;
                 heldPiece = temp;
                 calcCurrentPieceLowestPossiblePosition();
+                counter = 0;
+                limit = isTouchingGround() ? lockDelay.getWorkingValue() : (Math.pow(gravity.getWorkingValue(), -1));
                 checkTopOut();
             }
             held = true;
@@ -537,6 +520,7 @@ public abstract class GameLogic {
         while (!isColliding(current.getX(), y + num + 1, current.getRotation())) {
             num++;
         }
+        totalScore += (long) scoreTable.getSoftDrop() * num;
         movePieceRelative(0, num);
     }
 
@@ -590,7 +574,6 @@ public abstract class GameLogic {
         if (fails == 4) {
             die();
         }
-        ///////////////////
 
         if (zone) {
             clearLinesZone();
@@ -614,7 +597,7 @@ public abstract class GameLogic {
                     backToBack = -1;
                 }
 
-                totalScore += scoreTable.get(linesCleared, spinState) * scoreTable.getB2bMulti() * (backToBack > 0 ? 1 : 0) + combo * scoreTable.getCombo();
+                totalScore += scoreTable.get(linesCleared, spinState) * (backToBack > 0 ? scoreTable.getB2bMulti() : 1) + (long) combo * scoreTable.getCombo();
 
             } else {
                 combo = -1;
@@ -732,6 +715,8 @@ public abstract class GameLogic {
         held = false;
         spinState = SPIN_NONE;
         calcCurrentPieceLowestPossiblePosition();
+        counter = 0;
+        limit = isTouchingGround() ? lockDelay.getWorkingValue() : (Math.pow(gravity.getWorkingValue(), -1));
     }
 
     private void startZone() {
