@@ -151,11 +151,11 @@ public abstract class GameLogic {
         dasLeft();
     }
 
-    // -external <do> <what> [how] [extra]
-
     public final void extMovePieceRight() {
         movePieceRelative(1, 0);
     }
+
+    // -external <do> <what> [how] [extra]
 
     public final void extMovePieceRightMax() {
         dasRight();
@@ -279,19 +279,29 @@ public abstract class GameLogic {
         lowestPossiblePosition = result;
     }
 
+    private void checkLockOut() {
+        Point[] piece = pieceTable.getPiece(current.getColor(), current.getRotation());
+        for (int i = 0; i < PIECEPOINTS; i++) {
+            Point point = piece[i];
+            if (stage[point.y + current.getY()][point.x + current.getX()] != PIECE_NONE) {
+                tryToDie();
+            }
+        }
+    }
+
     private void checkSpin(int tries) {
         int sum = 0;
         int x = current.getX();
         int y = current.getY();
         int rot = current.getRotation();
-        Point[] points = maskTable.getPoints(current.getPieceNumber(), current.getRotation());
-        int[] sums = maskTable.getScores(current.getPieceNumber());
+        Point[] points = maskTable.getPoints(current.getColor(), current.getRotation());
+        int[] sums = maskTable.getScores(current.getColor());
         for (int i = 0; i < points.length; i++) {
             if (isSolid(x + points[i].x, y + points[i].y)) {
                 sum += sums[i];
             }
         }
-        switch (current.getPieceNumber()) {
+        switch (current.getColor()) {
             case PIECE_Z:
             case PIECE_L:
             case PIECE_S:
@@ -325,17 +335,14 @@ public abstract class GameLogic {
     }
 
     private void checkTopOut() {
-        Point[] temp = pieceTable.getPiece(current.getPieceNumber(), current.getRotation());
+        Point[] piece = pieceTable.getPiece(current.getColor(), current.getRotation());
         for (int i = 0; i < PIECEPOINTS; i++) {
-            Point point = temp[i];
-            if (stage[point.y + current.getY()][point.x + current.getX()] != PIECE_NONE) {
-                if (zone) {
-                    stopZone();
-                } else {
-                    die();
-                }
+            Point point = piece[i];
+            if (current.getY() + point.y >= STAGESIZEY - PLAYABLEROWS) {
+                return;
             }
         }
+        tryToDie();
     }
 
     private void clearLine(int line) {
@@ -386,7 +393,6 @@ public abstract class GameLogic {
     }
 
     private void clearLinesZone() {
-
         boolean yes;
         for (int i = STAGESIZEY - 1 - zoneLines; i > 0; i--) {
             yes = true;
@@ -450,7 +456,7 @@ public abstract class GameLogic {
                 calcCurrentPieceLowestPossiblePosition();
                 counter = 0;
                 limit = isTouchingGround() ? lockDelay.getWorkingValue() : (Math.pow(gravity.getWorkingValue(), -1));
-                checkTopOut();
+                checkLockOut();
             }
             held = true;
         }
@@ -510,7 +516,7 @@ public abstract class GameLogic {
     private boolean isColliding(int x, int y, int rotation) {
         Point[] temp;
 
-        temp = pieceTable.getPiece(current.getPieceNumber(), rotation);
+        temp = pieceTable.getPiece(current.getColor(), rotation);
         for (int i = 0; i < PIECEPOINTS; i++) {
             Point point = temp[i];
             if (isInsideBounds(x + point.x, y + point.y)) {
@@ -541,26 +547,13 @@ public abstract class GameLogic {
 
         totalPiecesPlaced++;
 
-        temp = pieceTable.getPiece(current.getPieceNumber(), current.getRotation());
+        temp = pieceTable.getPiece(current.getColor(), current.getRotation());
         for (int i = 0; i < PIECEPOINTS; i++) {
             Point p = temp[i];
-            stage[current.getY() + p.y][current.getX() + p.x] = current.getPieceNumber();
+            stage[current.getY() + p.y][current.getX() + p.x] = current.getColor();
         }
 
-        // check for too high placement
-        int fails = 0;
-        temp = pieceTable.getPiece(current.getPieceNumber(), current.getRotation());
-        for (int i = 0; i < PIECEPOINTS; i++) {
-            Point point = temp[i];
-            if (current.getY() + point.y >= STAGESIZEY - PLAYABLEROWS) {
-                break;
-            } else {
-                fails++;
-            }
-        }
-        if (fails == PIECEPOINTS) {
-            die();
-        }
+        checkTopOut();
 
         if (zone) {
             clearLinesZone();
@@ -613,7 +606,7 @@ public abstract class GameLogic {
 
         spawnPiece();
 
-        checkTopOut();
+        checkLockOut();
     }
 
     private boolean movePiece(int newX, int newY, int newR) {
@@ -642,7 +635,7 @@ public abstract class GameLogic {
             if (j == garbageHole) {
                 stage[STAGESIZEY - 1][j] = PIECE_NONE;
             } else {
-                stage[STAGESIZEY - 1][j] = 8;
+                stage[STAGESIZEY - 1][j] = PIECE_GARBAGE;
             }
         }
 
@@ -656,7 +649,7 @@ public abstract class GameLogic {
     private void rotatePiece(int d) {
         int oldRotation = current.getRotation();
         int newRotation = (current.getRotation() + d + 4) % 4;
-        int piece = current.getPieceNumber();
+        int piece = current.getColor();
         int state = STATES[oldRotation][newRotation];
 
         for (int tries = 0; tries < kickTable.maxTries(piece, state); tries++) {
@@ -708,6 +701,7 @@ public abstract class GameLogic {
 
     private void startZone() {
         zone = true;
+        zoneLines = 0;
     }
 
     private void stopZone() {
@@ -721,7 +715,6 @@ public abstract class GameLogic {
                 }
             }
         }
-        zoneLines = 0;
     }
 
     private void tick() {
@@ -740,6 +733,14 @@ public abstract class GameLogic {
             garbageCap.tick(ticksPassed);
             garbageMultiplier.tick(ticksPassed);
             lockDelay.tick(ticksPassed);
+        }
+    }
+
+    private void tryToDie() {
+        if (zone) {
+            stopZone();
+        } else {
+            die();
         }
     }
 

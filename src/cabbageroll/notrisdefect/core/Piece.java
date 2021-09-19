@@ -2,32 +2,32 @@ package cabbageroll.notrisdefect.core;
 
 public class Piece {
 
-    private int pieceNumber;
+    private int color;
     private int x;
     private int y;
     private int rotation;
 
     public Piece(Piece p) {
-        this(p.getPieceNumber());
+        this(p.getColor());
     }
 
-    public Piece(int pieceNumber) {
-        this(pieceNumber, 3, 17, 0);
+    public Piece(int color) {
+        this(color, 3, 17, 0);
     }
 
-    public Piece(int pieceNumber, int x, int y, int rotation) {
-        this.pieceNumber = pieceNumber;
+    public Piece(int color, int x, int y, int rotation) {
+        this.color = color;
         this.x = x;
         this.y = y;
         this.rotation = rotation;
     }
 
-    public int getPieceNumber() {
-        return pieceNumber;
+    public int getColor() {
+        return color;
     }
 
-    public void setPieceNumber(int pieceNumber) {
-        this.pieceNumber = pieceNumber;
+    public void setColor(int color) {
+        this.color = color;
     }
 
     public int getRotation() {
