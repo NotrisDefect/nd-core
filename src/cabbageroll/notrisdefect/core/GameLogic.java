@@ -106,88 +106,76 @@ public abstract class GameLogic {
     private int lowestPossiblePosition;
     private int spinState;
 
-    public abstract void evtGameover();
-
-    public abstract void evtLineClear(int row, int[] content);
-
-    public abstract void evtLockPiece(Piece piece, int linesCleared, int spinState, int combo, int backToBack);
-
-    public abstract void evtPerfectClear();
-
-    public abstract void evtSendGarbage(int n);
-
-    public abstract void evtSpin();
-
-    public final void extAbortGame() {
+    public void extAbortGame() {
         die();
     }
 
-    public final void extAddGarbage(int n) {
+    public void extAddGarbage(int n) {
         receiveGarbage(n);
     }
 
-    public final void extDropPieceHard() {
+    public void extDropPieceHard() {
         hardDropPiece();
     }
 
-    public final void extDropPieceSoft() {
+    public void extDropPieceSoft() {
         movePieceRelative(0, 1);
         totalScore += Math.max(0, scoreTable.getSoftDrop());
     }
 
-    public final void extDropPieceSoftMax() {
+    public void extDropPieceSoftMax() {
         instantSoftDrop();
     }
 
-    public final void extHoldPiece() {
+    public void extHoldPiece() {
         holdPiece();
     }
 
-    public final void extMovePieceLeft() {
+    public void extMovePieceLeft() {
         movePieceRelative(-1, 0);
     }
 
-    public final void extMovePieceLeftMax() {
+    public void extMovePieceLeftMax() {
         dasLeft();
     }
 
-    public final void extMovePieceRight() {
+    public void extMovePieceRight() {
         movePieceRelative(1, 0);
     }
 
-    // -external <do> <what> [how] [extra]
-
-    public final void extMovePieceRightMax() {
+    public void extMovePieceRightMax() {
         dasRight();
     }
 
-    public final void extRotatePiece180() {
+    public void extRotatePiece180() {
         rotatePiece(2);
     }
 
-    public final void extRotatePieceCCW() {
+    public void extRotatePieceCCW() {
         rotatePiece(-1);
     }
 
-    public final void extRotatePieceCW() {
+    public void extRotatePieceCW() {
         rotatePiece(1);
     }
 
-    public final void extStartGame() {
+    public void extStartGame() {
         extStartGame(new Random().nextLong());
     }
 
-    public final void extStartGame(double seed) {
+    public void extStartGame(double seed) {
         pieceRandomizer = new Random((long) seed);
         garbageRandomizer = new Random((long) seed);
         initGame();
     }
 
-    public final void extStartZone() {
+    // -external <do> <what> [how] [extra]
+
+    public void extStartZone() {
         startZone();
     }
 
-    public final void extTick() {
+    public void extTick() {
         tick();
     }
 
@@ -270,6 +258,18 @@ public abstract class GameLogic {
     public boolean isDead() {
         return dead;
     }
+
+    protected abstract void evtGameover();
+
+    protected abstract void evtLineClear(int row, int[] content);
+
+    protected abstract void evtLockPiece(Piece piece, int linesCleared, int spinState, int combo, int backToBack);
+
+    protected abstract void evtPerfectClear();
+
+    protected abstract void evtSendGarbage(int n);
+
+    protected abstract void evtSpin();
 
     private void calcCurrentPieceLowestPossiblePosition() {
         int result = current.getY();
