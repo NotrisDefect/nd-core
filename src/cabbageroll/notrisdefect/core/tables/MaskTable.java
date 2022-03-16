@@ -65,10 +65,10 @@ public class MaskTable {
     }
 
     public Point[] getPoints(int piece, int rotation) {
-        return masks[piece][rotation];
+        return masks[piece-1][rotation];
     }
 
     public int[] getScores(int piece) {
-        return scores[piece];
+        return scores[piece-1];
     }
 }
