@@ -7,8 +7,8 @@ import cabbageroll.notrisdefect.core.tables.PieceTable;
 import cabbageroll.notrisdefect.core.tables.ScoreTable;
 
 import java.awt.Point;
-import java.util.ArrayList;
 import java.util.Random;
+import java.util.Vector;
 
 public abstract class GameLogic {
 
@@ -92,6 +92,8 @@ public abstract class GameLogic {
 
     protected int PIECESPAWNDELAY = 100;
     protected int LINECLEARDELAY = 500;
+    protected int DAS = 200;
+    protected int ARR = 50;
 
     // permanent once a round starts
     private Random garbageRandomizer;
@@ -104,7 +106,7 @@ public abstract class GameLogic {
     private int nextPiecesLeft;
     private Piece heldPiece;
     private boolean held;
-    private ArrayList garbageQueue;
+    private Vector garbageQueue;
     private int garbageHole;
     private int combo;
 
@@ -127,6 +129,13 @@ public abstract class GameLogic {
     private int zoneLines;
     private boolean zone;
     private int backToBack;
+
+    // keys
+    private boolean leftKey;
+    private boolean rightKey;
+    private boolean downKey;
+    private int leftKeyTime;
+    private int rightKeyTime;
 
     public void doAbort() {
         if (gameState == STATE_DEAD) {
@@ -190,6 +199,54 @@ public abstract class GameLogic {
         }
 
         togglePause();
+    }
+
+    public void doPressDown() {
+        if (checkPausedOrInvalid()) {
+            return;
+        }
+
+        downKey = true;
+    }
+
+    public void doPressLeft() {
+        if (checkPausedOrInvalid()) {
+            return;
+        }
+
+        leftKey = true;
+    }
+
+    public void doPressRight() {
+        if (checkPausedOrInvalid()) {
+            return;
+        }
+
+        rightKey = true;
+    }
+
+    public void doReleaseDown() {
+        if (checkPausedOrInvalid()) {
+            return;
+        }
+
+        downKey = false;
+    }
+
+    public void doReleaseLeft() {
+        if (checkPausedOrInvalid()) {
+            return;
+        }
+
+        leftKey = false;
+    }
+
+    public void doReleaseRight() {
+        if (checkPausedOrInvalid()) {
+            return;
+        }
+
+        rightKey = false;
     }
 
     public void doRotate180() {
@@ -287,7 +344,7 @@ public abstract class GameLogic {
         return garbageMultiplier;
     }
 
-    public ArrayList getGarbageQueue() {
+    public Vector getGarbageQueue() {
         return garbageQueue;
     }
 
@@ -408,7 +465,7 @@ public abstract class GameLogic {
     protected abstract void evtSpin();
 
     private void calcCounterEnd() {
-        counterEnd = isTouchingGround() ? lockDelay.getRealValue() : gravity.getRealValue();
+        counterEnd = isTouchingGround() ? lockDelay.getRealValue() : (gravity.getRealValue() / (downKey ? 4 : 1));
     }
 
     private void calcCurrentPieceLowestPossiblePosition() {
@@ -634,7 +691,7 @@ public abstract class GameLogic {
         heldPiece = null;
         held = false;
 
-        garbageQueue = new ArrayList();
+        garbageQueue = new Vector();
         garbageHole = garbageRandomizer.nextInt(STAGESIZEX);
 
         zoneLines = 0;
@@ -649,6 +706,13 @@ public abstract class GameLogic {
         totalPiecesPlaced = 0;
         totalGarbageReceived = 0;
         totalGarbageSent = 0;
+
+        leftKey = false;
+        rightKey = false;
+        downKey = false;
+
+        leftKeyTime = 0;
+        rightKeyTime = 0;
 
         gravity.reset();
         garbageCap.reset();
@@ -922,6 +986,24 @@ public abstract class GameLogic {
                 }
             }
         } else {
+            if (leftKey) {
+                if (leftKeyTime == 0 || leftKeyTime >= millisToTicks(DAS) && (leftKeyTime - millisToTicks(DAS)) % millisToTicks(ARR) == 0) {
+                    movePieceRelative(-1, 0);
+                }
+                leftKeyTime++;
+            } else {
+                leftKeyTime = 0;
+            }
+
+            if (rightKey) {
+                if (rightKeyTime == 0 || rightKeyTime >= millisToTicks(DAS) && (rightKeyTime - millisToTicks(DAS)) % millisToTicks(ARR) == 0) {
+                    movePieceRelative(1, 0);
+                }
+                rightKeyTime++;
+            } else {
+                rightKeyTime = 0;
+            }
+
             if (counter >= counterEnd && !movePieceRelative(0, +1)) {
                 lockPiece();
             }
