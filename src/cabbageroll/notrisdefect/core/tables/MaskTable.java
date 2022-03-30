@@ -1,6 +1,6 @@
 package cabbageroll.notrisdefect.core.tables;
 
-import java.awt.Point;
+import cabbageroll.notrisdefect.core.Point;
 
 public class MaskTable {
     public static final MaskTable SRS = new MaskTable(new Point[][][]{

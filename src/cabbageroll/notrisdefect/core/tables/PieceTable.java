@@ -1,6 +1,6 @@
 package cabbageroll.notrisdefect.core.tables;
 
-import java.awt.Point;
+import cabbageroll.notrisdefect.core.Point;
 
 public class PieceTable {
     public static final PieceTable GUIDELINE = new PieceTable(new Point[][][]{

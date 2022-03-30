@@ -6,7 +6,6 @@ import cabbageroll.notrisdefect.core.tables.MaskTable;
 import cabbageroll.notrisdefect.core.tables.PieceTable;
 import cabbageroll.notrisdefect.core.tables.ScoreTable;
 
-import java.awt.Point;
 import java.util.Random;
 import java.util.Vector;
 
@@ -72,7 +71,7 @@ public abstract class GameLogic {
     private final Property garbageMultiplier = new Property(1d, 30 * TPS, 0.02d, 2d);
     private final Property gravity = new Property(1d, 30 * TPS, 0.1d, 20d) {
         public int getRealValue() {
-            return millisToTicks((int) (Math.pow(getWorkingValue(), -1) * 1000));
+            return millisToTicks((int) ((double) 1000 / getWorkingValue()));
         }
     };
     private final Property lockDelay = new Property(2000, 60 * TPS, -20, 500) {
@@ -553,8 +552,11 @@ public abstract class GameLogic {
     }
 
     private void clearLine(int line) {
+        int[] lineCopy = new int[STAGESIZEX];
 
-        evtLineClear(line, (int[]) stage[line].clone());
+        System.arraycopy(stage[line], 0, lineCopy, 0, STAGESIZEX);
+
+        evtLineClear(line, lineCopy);
 
         for (int i = line; i > 0; i--) {
             System.arraycopy(stage[i - 1], 0, stage[i], 0, STAGESIZEX);
@@ -887,13 +889,13 @@ public abstract class GameLogic {
     }
 
     private void receiveGarbage(int n) {
-        garbageQueue.add(new Integer(n));
+        garbageQueue.addElement(new Integer(n));
     }
 
     private void removeOneGarbageFromQueue() {
-        garbageQueue.set(0, new Integer(((Integer) garbageQueue.get(0)).intValue() - 1));
-        if (((Integer) garbageQueue.get(0)).intValue() == 0) {
-            garbageQueue.remove(0);
+        garbageQueue.setElementAt(new Integer(((Integer) garbageQueue.elementAt(0)).intValue() - 1), 0);
+        if (((Integer) garbageQueue.elementAt(0)).intValue() == 0) {
+            garbageQueue.removeElementAt(0);
             garbageHole = garbageRandomizer.nextInt(STAGESIZEX);
         }
     }
