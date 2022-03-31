@@ -1085,9 +1085,9 @@ public abstract class GameLogic {
         counter++;
         ticksPassed++;
 
-        checkLeftKey = false;
-        checkRightKey = false;
-        checkDownKey = false;
+        checkLeftKey = true;
+        checkRightKey = true;
+        checkDownKey = true;
     }
 
     private int ticksToMillis(int n) {

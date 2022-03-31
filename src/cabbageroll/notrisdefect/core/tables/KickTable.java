@@ -3,62 +3,62 @@ package cabbageroll.notrisdefect.core.tables;
 import cabbageroll.notrisdefect.core.Point;
 
 public class KickTable {
-    public static final KickTable KICK_TABLE_SRS_TETRIO = new KickTable(new Point[][][]{
+    public static final KickTable SRS_PLUS = new KickTable(new int[][][][]{
         {//J, L, S, T, Z Tetromino Wall Kick Data
 
-            {new Point(0, 0), new Point(-1, 0), new Point(-1, +1), new Point(0, -2), new Point(-1, -2)},
-            {new Point(0, 0), new Point(+1, 0), new Point(+1, -1), new Point(0, +2), new Point(+1, +2)},
+            {{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},
+            {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},
 
-            {new Point(0, 0), new Point(+1, 0), new Point(+1, -1), new Point(0, +2), new Point(+1, +2)},
-            {new Point(0, 0), new Point(-1, 0), new Point(-1, +1), new Point(0, -2), new Point(-1, -2)},
+            {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},
+            {{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},
 
-            {new Point(0, 0), new Point(+1, 0), new Point(+1, +1), new Point(0, -2), new Point(+1, -2)},
-            {new Point(0, 0), new Point(-1, 0), new Point(-1, -1), new Point(0, +2), new Point(-1, +2)},
+            {{0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}},
+            {{0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}},
 
-            {new Point(0, 0), new Point(-1, 0), new Point(-1, -1), new Point(0, +2), new Point(-1, +2)},
-            {new Point(0, 0), new Point(+1, 0), new Point(+1, +1), new Point(0, -2), new Point(+1, -2)},
+            {{0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}},
+            {{0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}},
 
-            {new Point(0, 0), new Point(0, +1), new Point(+1, +1), new Point(-1, +1), new Point(+1, 0), new Point(-1, 0)},
-            {new Point(0, 0), new Point(+1, 0), new Point(+1, +2), new Point(+1, +1), new Point(0, +2), new Point(0, +1)},
+            {{0, 0}, {0, +1}, {+1, +1}, {-1, +1}, {+1, 0}, {-1, 0}},
+            {{0, 0}, {0, -1}, {-1, -1}, {+1, -1}, {-1, 0}, {+1, 0}},
 
-            {new Point(0, 0), new Point(0, -1), new Point(-1, -1), new Point(+1, -1), new Point(-1, 0), new Point(+1, 0)},
-            {new Point(0, 0), new Point(-1, 0), new Point(-1, +2), new Point(-1, +1), new Point(0, +2), new Point(0, +1)},
+            {{0, 0}, {+1, 0}, {+1, +2}, {+1, +1}, {0, +2}, {0, +1}},
+            {{0, 0}, {-1, 0}, {-1, +2}, {-1, +1}, {0, +2}, {0, +1}},
         },
         {//I Tetromino Wall Kick Data
 
-            {new Point(0, 0), new Point(+1, 0), new Point(-2, 0), new Point(-2, -1), new Point(+1, +2)},
-            {new Point(0, 0), new Point(-1, 0), new Point(+2, 0), new Point(-1, -2), new Point(+2, +1)},
+            {{0, 0}, {+1, 0}, {-2, 0}, {-2, -1}, {+1, +2}},
+            {{0, 0}, {-1, 0}, {+2, 0}, {-1, -2}, {+2, +1}},
 
-            {new Point(0, 0), new Point(-1, 0), new Point(+2, 0), new Point(-1, +2), new Point(+2, -1)},
-            {new Point(0, 0), new Point(-2, 0), new Point(+1, 0), new Point(-2, +1), new Point(+1, -2)},
+            {{0, 0}, {-1, 0}, {+2, 0}, {-1, +2}, {+2, -1}},
+            {{0, 0}, {-2, 0}, {+1, 0}, {-2, +1}, {+1, -2}},
 
-            {new Point(0, 0), new Point(+2, 0), new Point(-1, 0), new Point(+2, +1), new Point(-1, -2)},
-            {new Point(0, 0), new Point(+1, 0), new Point(-2, 0), new Point(+1, +2), new Point(-2, -1)},
+            {{0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}},
+            {{0, 0}, {+1, 0}, {-2, 0}, {+1, +2}, {-2, -1}},
 
-            {new Point(0, 0), new Point(+1, 0), new Point(-2, 0), new Point(+1, -2), new Point(-2, +1)},
-            {new Point(0, 0), new Point(-1, 0), new Point(+2, 0), new Point(+2, -1), new Point(-1, +2)},
+            {{0, 0}, {+1, 0}, {-2, 0}, {+1, -2}, {-2, +1}},
+            {{0, 0}, {-1, 0}, {+2, 0}, {+2, -1}, {-1, +2}},
 
-            {new Point(0, 0), new Point(0, +1)},
-            {new Point(0, 0), new Point(0, -1)},
+            {{0, 0}, {0, +1}},
+            {{0, 0}, {0, -1}},
 
-            {new Point(0, 0), new Point(+1, 0)},
-            {new Point(0, 0), new Point(-1, 0)},
+            {{0, 0}, {+1, 0}},
+            {{0, 0}, {-1, 0}}
         }
     });
-    public static final KickTable KICK_TABLE_SRS_GUIDELINE = new KickTable(new Point[][][]{
+    public static final KickTable SRS = new KickTable(new int[][][][]{
         {//J, L, S, T, Z Tetromino Wall Kick Data
 
-            {new Point(0, 0), new Point(-1, 0), new Point(-1, +1), new Point(0, -2), new Point(-1, -2)},
-            {new Point(0, 0), new Point(+1, 0), new Point(+1, -1), new Point(0, +2), new Point(+1, +2)},
+            {{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},
+            {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},
 
-            {new Point(0, 0), new Point(+1, 0), new Point(+1, -1), new Point(0, +2), new Point(+1, +2)},
-            {new Point(0, 0), new Point(-1, 0), new Point(-1, +1), new Point(0, -2), new Point(-1, -2)},
+            {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},
+            {{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},
 
-            {new Point(0, 0), new Point(+1, 0), new Point(+1, +1), new Point(0, -2), new Point(+1, -2)},
-            {new Point(0, 0), new Point(-1, 0), new Point(-1, -1), new Point(0, +2), new Point(-1, +2)},
+            {{0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}},
+            {{0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}},
 
-            {new Point(0, 0), new Point(-1, 0), new Point(-1, -1), new Point(0, +2), new Point(-1, +2)},
-            {new Point(0, 0), new Point(+1, 0), new Point(+1, +1), new Point(0, -2), new Point(+1, -2)},
+            {{0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}},
+            {{0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}},
 
             {},
             {},
@@ -68,17 +68,17 @@ public class KickTable {
         },
         {//I Tetromino Wall Kick Data
 
-            {new Point(0, 0), new Point(-2, 0), new Point(+1, 0), new Point(-2, -1), new Point(+1, +2)},
-            {new Point(0, 0), new Point(+2, 0), new Point(-1, 0), new Point(+2, +1), new Point(-1, -2)},
+            {{0, 0}, {-2, 0}, {+1, 0}, {-2, -1}, {+1, +2}},
+            {{0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}},
 
-            {new Point(0, 0), new Point(-1, 0), new Point(+2, 0), new Point(-1, +2), new Point(+2, -1)},
-            {new Point(0, 0), new Point(+1, 0), new Point(-2, 0), new Point(+1, -2), new Point(-2, +1)},
+            {{0, 0}, {-1, 0}, {+2, 0}, {-1, +2}, {+2, -1}},
+            {{0, 0}, {+1, 0}, {-2, 0}, {+1, -2}, {-2, +1}},
 
-            {new Point(0, 0), new Point(+2, 0), new Point(-1, 0), new Point(+2, +1), new Point(-1, -2)},
-            {new Point(0, 0), new Point(-2, 0), new Point(+1, 0), new Point(-2, -1), new Point(+1, +2)},
+            {{0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}},
+            {{0, 0}, {-2, 0}, {+1, 0}, {-2, -1}, {+1, +2}},
 
-            {new Point(0, 0), new Point(+1, 0), new Point(-2, 0), new Point(+1, -2), new Point(-2, +1)},
-            {new Point(0, 0), new Point(-1, 0), new Point(+2, 0), new Point(-1, +2), new Point(+2, -1)},
+            {{0, 0}, {+1, 0}, {-2, 0}, {+1, -2}, {-2, +1}},
+            {{0, 0}, {-1, 0}, {+2, 0}, {-1, +2}, {+2, -1}},
 
             {},
             {},
@@ -87,46 +87,46 @@ public class KickTable {
             {},
         }
     });
-    public static final KickTable SRS_180 = new KickTable(new Point[][][]{
+    public static final KickTable SRS_180 = new KickTable(new int[][][][]{
         {//J, L, S, T, Z Tetromino Wall Kick Data
 
-            {new Point(0, 0), new Point(-1, 0), new Point(-1, +1), new Point(0, -2), new Point(-1, -2)},
-            {new Point(0, 0), new Point(+1, 0), new Point(+1, -1), new Point(0, +2), new Point(+1, +2)},
+            {{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},
+            {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},
 
-            {new Point(0, 0), new Point(+1, 0), new Point(+1, -1), new Point(0, +2), new Point(+1, +2)},
-            {new Point(0, 0), new Point(-1, 0), new Point(-1, +1), new Point(0, -2), new Point(-1, -2)},
+            {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},
+            {{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},
 
-            {new Point(0, 0), new Point(+1, 0), new Point(+1, +1), new Point(0, -2), new Point(+1, -2)},
-            {new Point(0, 0), new Point(-1, 0), new Point(-1, -1), new Point(0, +2), new Point(-1, +2)},
+            {{0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}},
+            {{0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}},
 
-            {new Point(0, 0), new Point(-1, 0), new Point(-1, -1), new Point(0, +2), new Point(-1, +2)},
-            {new Point(0, 0), new Point(+1, 0), new Point(+1, +1), new Point(0, -2), new Point(+1, -2)},
+            {{0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}},
+            {{0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}},
 
-            {new Point(0, 0)},
-            {new Point(0, 0)},
+            {{0, 0}},
+            {{0, 0}},
 
-            {new Point(0, 0)},
-            {new Point(0, 0)},
+            {{0, 0}},
+            {{0, 0}},
         },
         {//I Tetromino Wall Kick Data
 
-            {new Point(0, 0), new Point(-2, 0), new Point(+1, 0), new Point(-2, -1), new Point(+1, +2)},
-            {new Point(0, 0), new Point(+2, 0), new Point(-1, 0), new Point(+2, +1), new Point(-1, -2)},
+            {{0, 0}, {-2, 0}, {+1, 0}, {-2, -1}, {+1, +2}},
+            {{0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}},
 
-            {new Point(0, 0), new Point(-1, 0), new Point(+2, 0), new Point(-1, +2), new Point(+2, -1)},
-            {new Point(0, 0), new Point(+1, 0), new Point(-2, 0), new Point(+1, -2), new Point(-2, +1)},
+            {{0, 0}, {-1, 0}, {+2, 0}, {-1, +2}, {+2, -1}},
+            {{0, 0}, {+1, 0}, {-2, 0}, {+1, -2}, {-2, +1}},
 
-            {new Point(0, 0), new Point(+2, 0), new Point(-1, 0), new Point(+2, +1), new Point(-1, -2)},
-            {new Point(0, 0), new Point(-2, 0), new Point(+1, 0), new Point(-2, -1), new Point(+1, +2)},
+            {{0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}},
+            {{0, 0}, {-2, 0}, {+1, 0}, {-2, -1}, {+1, +2}},
 
-            {new Point(0, 0), new Point(+1, 0), new Point(-2, 0), new Point(+1, -2), new Point(-2, +1)},
-            {new Point(0, 0), new Point(-1, 0), new Point(+2, 0), new Point(-1, +2), new Point(+2, -1)},
+            {{0, 0}, {+1, 0}, {-2, 0}, {+1, -2}, {-2, +1}},
+            {{0, 0}, {-1, 0}, {+2, 0}, {-1, +2}, {+2, -1}},
 
-            {new Point(0, 0)},
-            {new Point(0, 0)},
+            {{0, 0}},
+            {{0, 0}},
 
-            {new Point(0, 0)},
-            {new Point(0, 0)},
+            {{0, 0}},
+            {{0, 0}},
         }
     });
 
@@ -139,8 +139,20 @@ public class KickTable {
     */
     private final Point[][][] kicks;
 
-    public KickTable(Point[][][] kicks) {
-        this.kicks = kicks;
+    public KickTable(int[][][][] kicks) {
+        // shit
+        this.kicks = new Point[2][12][];
+        for (int i = 0; i < kicks.length; i++) {
+            int[][][] type = kicks[i];
+            for (int j = 0; j < type.length; j++) {
+                int[][] row = type[j];
+                this.kicks[i][j] = new Point[row.length];
+                for (int k = 0; k < row.length; k++) {
+                    int[] offset = row[k];
+                    this.kicks[i][j][k] = new Point(offset[0], offset[1]);
+                }
+            }
+        }
     }
 
     public int getX(int piece, int state, int tries) {
