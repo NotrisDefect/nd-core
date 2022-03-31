@@ -135,6 +135,12 @@ public abstract class GameLogic {
     private boolean downKey;
     private int leftKeyTime;
     private int rightKeyTime;
+    private int downKeyTime;
+    private boolean scheduleHardDrop;
+    private boolean scheduleRotateCCW;
+    private boolean scheduleRotateCW;
+    private boolean scheduleRotate180;
+    private boolean scheduleHold;
 
     public void doAbort() {
         if (gameState == STATE_DEAD) {
@@ -157,7 +163,7 @@ public abstract class GameLogic {
             return;
         }
 
-        hardDropPiece();
+        scheduleHardDrop = true;
     }
 
     public void doHold() {
@@ -165,9 +171,10 @@ public abstract class GameLogic {
             return;
         }
 
-        holdPiece();
+        scheduleHold = true;
     }
 
+    // deprecated
     public void doInstantSoftDrop() {
         if (checkPausedOrInvalid()) {
             return;
@@ -176,6 +183,7 @@ public abstract class GameLogic {
         instantSoftDrop();
     }
 
+    // deprecated
     public void doMoveLeft() {
         if (checkPausedOrInvalid()) {
             return;
@@ -184,6 +192,7 @@ public abstract class GameLogic {
         movePieceRelative(-1, 0);
     }
 
+    // deprecated
     public void doMoveRight() {
         if (checkPausedOrInvalid()) {
             return;
@@ -253,7 +262,7 @@ public abstract class GameLogic {
             return;
         }
 
-        rotatePiece(2);
+        scheduleRotate180 = true;
     }
 
     public void doRotateCCW() {
@@ -261,7 +270,7 @@ public abstract class GameLogic {
             return;
         }
 
-        rotatePiece(-1);
+        scheduleRotateCCW = true;
     }
 
     public void doRotateCW() {
@@ -269,9 +278,10 @@ public abstract class GameLogic {
             return;
         }
 
-        rotatePiece(1);
+        scheduleRotateCW = true;
     }
 
+    // deprecated
     public void doSoftDrop() {
         if (checkPausedOrInvalid()) {
             return;
@@ -618,6 +628,7 @@ public abstract class GameLogic {
         }
     }
 
+    // deprecated
     private void dasLeft() {
         int num = 0;
         int x = currentPiece.getX();
@@ -627,6 +638,7 @@ public abstract class GameLogic {
         movePieceRelative(num, 0);
     }
 
+    // deprecated
     private void dasRight() {
         int num = 0;
         int x = currentPiece.getX();
@@ -665,13 +677,6 @@ public abstract class GameLogic {
                 calcCurrentPieceLowestPossiblePosition();
                 counter = 0;
                 calcCounterEnd();
-                while (counter == counterEnd) {
-                    if (!movePieceRelative(0, +1)) {
-                        lockPiece();
-                    } else {
-                        calcCounterEnd();
-                    }
-                }
                 checkBlockOut();
             }
             held = true;
@@ -715,6 +720,13 @@ public abstract class GameLogic {
 
         leftKeyTime = 0;
         rightKeyTime = 0;
+        downKeyTime = 0;
+
+        scheduleHardDrop = false;
+        scheduleRotateCCW = false;
+        scheduleRotateCW = false;
+        scheduleRotate180 = false;
+        scheduleHold = false;
 
         gravity.reset();
         garbageCap.reset();
@@ -807,9 +819,6 @@ public abstract class GameLogic {
                 counter = 0;
                 counterEnd = millisToTicks(PIECESPAWNDELAY);
             }
-            if (counter != counterEnd) {
-                gameState = STATE_DELAY;
-            }
             evtLockPiece(currentPiece, linesCleared, spinState, combo, backToBack);
 
         }
@@ -838,20 +847,13 @@ public abstract class GameLogic {
 
     private boolean movePiece(int newX, int newY, int newR) {
         if (!isColliding(newX, newY, newR)) {
-            counter = 0;
             currentPiece.setX(newX);
             currentPiece.setY(newY);
             currentPiece.setRotation(newR);
             spinState = SPIN_NONE;
             calcCurrentPieceLowestPossiblePosition();
+            counter = 0;
             calcCounterEnd();
-            while (counter == counterEnd) {
-                if (!movePieceRelative(0, +1)) {
-                    lockPiece();
-                } else {
-                    calcCounterEnd();
-                }
-            }
             return true;
         }
         return false;
@@ -944,7 +946,6 @@ public abstract class GameLogic {
         held = false;
         spinState = SPIN_NONE;
         calcCurrentPieceLowestPossiblePosition();
-        counter = 0;
     }
 
     private void startZone() {
@@ -966,6 +967,7 @@ public abstract class GameLogic {
     }
 
     private void tick() {
+        System.out.println("test " + ticksPassed);
         if (gameState >= STATE_PAUSED) {
             return;
         }
@@ -975,22 +977,27 @@ public abstract class GameLogic {
         }
 
         if (gameState == STATE_DELAY) {
-            if (counter >= counterEnd) {
+            if (counter == counterEnd) {
                 gameState = STATE_ALIVE;
                 counter = 0;
                 calcCounterEnd();
-                while (counter == counterEnd) {
-                    if (!movePieceRelative(0, +1)) {
-                        lockPiece();
-                    } else {
-                        calcCounterEnd();
-                    }
-                }
+                tick();
+                return;
             }
         } else {
+            if (counter == counterEnd) {
+                if (!movePieceRelative(0, +1)) {
+                    lockPiece();
+                }
+                tick();
+                return;
+            }
+
             if (leftKey) {
                 if (leftKeyTime == 0 || leftKeyTime >= millisToTicks(DAS) && (leftKeyTime - millisToTicks(DAS)) % millisToTicks(ARR) == 0) {
                     movePieceRelative(-1, 0);
+                    tick();
+                    return;
                 }
                 leftKeyTime++;
             } else {
@@ -1000,14 +1007,48 @@ public abstract class GameLogic {
             if (rightKey) {
                 if (rightKeyTime == 0 || rightKeyTime >= millisToTicks(DAS) && (rightKeyTime - millisToTicks(DAS)) % millisToTicks(ARR) == 0) {
                     movePieceRelative(1, 0);
+                    tick();
+                    return;
                 }
                 rightKeyTime++;
             } else {
                 rightKeyTime = 0;
             }
 
-            if (counter >= counterEnd && !movePieceRelative(0, +1)) {
-                lockPiece();
+            if (downKey) {
+                if (downKeyTime == 0) {
+                    movePieceRelative(1, 0);
+                    tick();
+                    return;
+                }
+                downKeyTime++;
+            } else {
+                downKeyTime = 0;
+            }
+
+            if (scheduleHardDrop) {
+                hardDropPiece();
+                scheduleHardDrop = false;
+            }
+
+            if (scheduleRotateCCW) {
+                rotatePiece(-1);
+                scheduleRotateCCW = false;
+            }
+
+            if (scheduleRotateCW) {
+                rotatePiece(1);
+                scheduleRotateCW = false;
+            }
+
+            if (scheduleRotate180) {
+                rotatePiece(2);
+                scheduleRotate180 = false;
+            }
+
+            if (scheduleHold) {
+                holdPiece();
+                scheduleHold = false;
             }
         }
 
