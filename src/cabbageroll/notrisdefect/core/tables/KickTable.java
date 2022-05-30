@@ -1,5 +1,6 @@
 package cabbageroll.notrisdefect.core.tables;
 
+import cabbageroll.notrisdefect.core.GameLogic;
 import cabbageroll.notrisdefect.core.Point;
 
 public class KickTable {
@@ -156,15 +157,15 @@ public class KickTable {
     }
 
     public int getX(int piece, int state, int tries) {
-        return kicks[piece == 4 ? 1 : 0][state][tries].x;
+        return kicks[piece == GameLogic.PIECE_I ? 1 : 0][state][tries].x;
     }
 
     public int getY(int piece, int state, int tries) {
-        return kicks[piece == 4 ? 1 : 0][state][tries].y;
+        return kicks[piece == GameLogic.PIECE_I ? 1 : 0][state][tries].y;
     }
 
     public int maxTries(int piece, int state) {
-        return kicks[piece == 4 ? 1 : 0][state].length;
+        return kicks[piece == GameLogic.PIECE_I ? 1 : 0][state].length;
     }
 
 }

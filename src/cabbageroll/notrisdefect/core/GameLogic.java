@@ -40,6 +40,7 @@ public abstract class GameLogic {
     public static final int PIECE_T = 7;
     public static final int PIECE_GARBAGE = 8;
     public static final int PIECE_ZONE = 9;
+    public static final int PIECE_NUKE = 10;
 
     public static final int SPIN_NONE = 0;
     public static final int SPIN_MINI = 1;
@@ -80,19 +81,21 @@ public abstract class GameLogic {
         }
     };
 
-    protected int STAGESIZEX = 10;
-    protected int STAGESIZEY = 40;
-    protected int PLAYABLEROWS = 20;
-    protected int NEXTPIECES = 5;
-
-    protected int DEFAULTSPAWNX = 3;
-    protected int DEFAULTSPAWNY = 18;
-    protected int DEFAULTSPAWNROTATION = 0;
-
-    protected int PIECESPAWNDELAY = 100;
-    protected int LINECLEARDELAY = 500;
-    protected int DAS = 200;
-    protected int ARR = 50;
+    private int STAGESIZEX = 10;
+    private int STAGESIZEY = 40;
+    private int PLAYABLEROWS = 20;
+    private int NEXTPIECES = 5;
+    private int DEFAULTSPAWNX = 3;
+    private int DEFAULTSPAWNY = 18;
+    private int DEFAULTSPAWNROTATION = 0;
+    private int PIECESPAWNDELAY = 100;
+    private int LINECLEARDELAY = 500;
+    private int DAS = 200;
+    private int ARR = 50;
+    private int SDF = 8;
+    private boolean ENABLENUKES = false;
+    private boolean ENABLEALLSPIN = false;
+    private boolean ENABLEALWAYSGARBAGE = false;
 
     // permanent once a round starts
     private Random garbageRandomizer;
@@ -309,6 +312,10 @@ public abstract class GameLogic {
     }
 
     public void doTick() {
+        if (gameState == STATE_DEAD) {
+            throw new IllegalStateException("Ticked while dead");
+        }
+
         tick();
     }
 
@@ -318,6 +325,14 @@ public abstract class GameLogic {
         }
 
         startZone();
+    }
+
+    public int getARR() {
+        return ARR;
+    }
+
+    public void setARR(int ARR) {
+        this.ARR = ARR;
     }
 
     public int getBackToBack() {
@@ -338,6 +353,38 @@ public abstract class GameLogic {
 
     public Piece getCurrentPiece() {
         return currentPiece;
+    }
+
+    public int getDAS() {
+        return DAS;
+    }
+
+    public void setDAS(int DAS) {
+        this.DAS = DAS;
+    }
+
+    public int getDEFAULTSPAWNROTATION() {
+        return DEFAULTSPAWNROTATION;
+    }
+
+    public void setDEFAULTSPAWNROTATION(int DEFAULTSPAWNROTATION) {
+        this.DEFAULTSPAWNROTATION = DEFAULTSPAWNROTATION;
+    }
+
+    public int getDEFAULTSPAWNX() {
+        return DEFAULTSPAWNX;
+    }
+
+    public void setDEFAULTSPAWNX(int DEFAULTSPAWNX) {
+        this.DEFAULTSPAWNX = DEFAULTSPAWNX;
+    }
+
+    public int getDEFAULTSPAWNY() {
+        return DEFAULTSPAWNY;
+    }
+
+    public void setDEFAULTSPAWNY(int DEFAULTSPAWNY) {
+        this.DEFAULTSPAWNY = DEFAULTSPAWNY;
     }
 
     public int getGameState() {
@@ -384,6 +431,14 @@ public abstract class GameLogic {
         return kickTable;
     }
 
+    public int getLINECLEARDELAY() {
+        return LINECLEARDELAY;
+    }
+
+    public void setLINECLEARDELAY(int LINECLEARDELAY) {
+        this.LINECLEARDELAY = LINECLEARDELAY;
+    }
+
     public Property getLockDelay() {
         return lockDelay;
     }
@@ -396,12 +451,36 @@ public abstract class GameLogic {
         return maskTable;
     }
 
+    public int getNEXTPIECES() {
+        return NEXTPIECES;
+    }
+
+    public void setNEXTPIECES(int NEXTPIECES) {
+        this.NEXTPIECES = NEXTPIECES;
+    }
+
     public Piece[] getNextPieces() {
         return nextPieces;
     }
 
     public int getNextPiecesLeft() {
         return nextPiecesLeft;
+    }
+
+    public int getPIECESPAWNDELAY() {
+        return PIECESPAWNDELAY;
+    }
+
+    public void setPIECESPAWNDELAY(int PIECESPAWNDELAY) {
+        this.PIECESPAWNDELAY = PIECESPAWNDELAY;
+    }
+
+    public int getPLAYABLEROWS() {
+        return PLAYABLEROWS;
+    }
+
+    public void setPLAYABLEROWS(int PLAYABLEROWS) {
+        this.PLAYABLEROWS = PLAYABLEROWS;
     }
 
     public Random getPieceRandomizer() {
@@ -414,6 +493,30 @@ public abstract class GameLogic {
 
     public Point[] getPoints(int piece, int rotation) {
         return pieceTable.getPiece(piece - 1, rotation);
+    }
+
+    public int getSDF() {
+        return SDF;
+    }
+
+    public void setSDF(int SDF) {
+        this.SDF = SDF;
+    }
+
+    public int getSTAGESIZEX() {
+        return STAGESIZEX;
+    }
+
+    public void setSTAGESIZEX(int STAGESIZEX) {
+        this.STAGESIZEX = STAGESIZEX;
+    }
+
+    public int getSTAGESIZEY() {
+        return STAGESIZEY;
+    }
+
+    public void setSTAGESIZEY(int STAGESIZEY) {
+        this.STAGESIZEY = STAGESIZEY;
     }
 
     public ScoreTable getScoreTable() {
@@ -464,11 +567,35 @@ public abstract class GameLogic {
         return zoneLines;
     }
 
+    public boolean isENABLEALLSPIN() {
+        return ENABLEALLSPIN;
+    }
+
+    public void setENABLEALLSPIN(boolean ENABLEALLSPIN) {
+        this.ENABLEALLSPIN = ENABLEALLSPIN;
+    }
+
+    public boolean isENABLEALWAYSGARBAGE() {
+        return ENABLEALWAYSGARBAGE;
+    }
+
+    public void setENABLEALWAYSGARBAGE(boolean ENABLEALWAYSGARBAGE) {
+        this.ENABLEALWAYSGARBAGE = ENABLEALWAYSGARBAGE;
+    }
+
+    public boolean isENABLENUKES() {
+        return ENABLENUKES;
+    }
+
+    public void setENABLENUKES(boolean ENABLENUKES) {
+        this.ENABLENUKES = ENABLENUKES;
+    }
+
     protected abstract void evtGameover();
 
     protected abstract void evtLineClear(int row, int[] content);
 
-    protected abstract void evtLockPiece(Piece piece, int linesCleared, int spinState, int combo, int backToBack);
+    protected abstract void evtLockPiece(Piece piece, int linesCleared, int spinState, int combo, int backToBack, boolean nuke);
 
     protected abstract void evtPerfectClear();
 
@@ -477,7 +604,7 @@ public abstract class GameLogic {
     protected abstract void evtSpin();
 
     private void calcCounterEnd() {
-        counterEnd = isTouchingGround() ? lockDelay.getRealValue() : (gravity.getRealValue() / (downKey ? 4 : 1));
+        counterEnd = isTouchingGround() ? lockDelay.getRealValue() : (gravity.getRealValue() / (downKey ? SDF : 1));
     }
 
     private void calcCurrentPieceLowestPossiblePosition() {
@@ -517,50 +644,35 @@ public abstract class GameLogic {
         return gameState == STATE_DELAY;
     }
 
-    private void checkSpin(int tries) {
-        int sum = 0;
+    private void checkSpin(int tries, int oldRotation, int newRotation) {
         int x = currentPiece.getX();
         int y = currentPiece.getY();
-        int rot = currentPiece.getRotation();
+
         Point[] points = maskTable.getPoints(currentPiece.getColor(), currentPiece.getRotation());
-        int[] sums = maskTable.getScores(currentPiece.getColor());
+        int[] values = maskTable.getScores(currentPiece.getColor());
+
+        int sum = 0;
+
         for (int i = 0; i < points.length; i++) {
             if (isSolid(x + points[i].x, y + points[i].y)) {
-                sum += sums[i];
+                sum += values[i];
             }
         }
-        switch (currentPiece.getColor()) {
-            /*
-            case PIECE_Z:
-            case PIECE_L:
-            case PIECE_S:
-            case PIECE_J:
-                if (tries > 0) {
-                    if (sum < 0) {
-                        spinState = SPIN_NONE;
-                    } else {
-                        if (sum < 2) {
-                            spinState = SPIN_MINI;
-                        } else {
-                            spinState = SPIN_FULL;
-                        }
-                        evtSpin();
-                    }
-                }
-                break;
-             */
-            case PIECE_T:
-                if (sum < 11) {
-                    spinState = SPIN_NONE;
-                } else {
-                    if (sum < 13) {
-                        spinState = SPIN_MINI;
-                    } else {
+        if (currentPiece.getColor() == PIECE_T || (ENABLEALLSPIN && currentPiece.getColor() != PIECE_O && currentPiece.getColor() != PIECE_I)) {
+            if (sum < 11) {
+                spinState = SPIN_NONE;
+            } else {
+                if (sum < 13) {
+                    if (tries == 4 && ((oldRotation == 0 || oldRotation == 2) && (newRotation == 1 || newRotation == 3))) {
                         spinState = SPIN_FULL;
+                    } else {
+                        spinState = SPIN_MINI;
                     }
-                    evtSpin();
+                } else {
+                    spinState = SPIN_FULL;
                 }
-                break;
+                evtSpin();
+            }
         }
     }
 
@@ -599,7 +711,7 @@ public abstract class GameLogic {
         for (int i = STAGESIZEY - 1; i >= 0; i--) {
             isFull = true;
             for (int j = 0; j < STAGESIZEX; j++) {
-                if (stage[i][j] == PIECE_NONE) {
+                if (stage[i][j] == PIECE_NONE || stage[i][j] == PIECE_NUKE) {
                     isFull = false;
                     break;
                 }
@@ -800,6 +912,21 @@ public abstract class GameLogic {
         } else {
 
             int linesCleared = clearLines();
+            boolean nuke = false;
+
+            if (ENABLENUKES) {
+                Point[] points = getPoints(currentPiece.getColor(), currentPiece.getRotation());
+                for (int i = 0; i < PIECEPOINTS; i++) {
+                    Point p = points[i];
+                    int x = currentPiece.getX() + p.x;
+                    int y = currentPiece.getY() + p.y;
+                    if (isInsideBounds(x, y + 1) && stage[y + 1][x] == PIECE_NUKE) {
+                        clearLine(y + 1);
+                        nuke = true;
+                        break;
+                    }
+                }
+            }
 
             if (linesCleared > 0) {
                 combo++;
@@ -818,15 +945,25 @@ public abstract class GameLogic {
                 }
 
                 totalScore += scoreTable.get(linesCleared, spinState) * (backToBack > 0 ? scoreTable.getB2bMulti() : 1) + (long) combo * scoreTable.getCombo();
+
+                if (ENABLEALWAYSGARBAGE) {
+                    tryToPutGarbage();
+                }
                 counter = 0;
                 counterEnd = millisToTicks(LINECLEARDELAY);
             } else {
-                combo = -1;
+                if (nuke) {
+                    combo++;
+                } else {
+                    combo = -1;
+                }
+
                 tryToPutGarbage();
                 counter = 0;
                 counterEnd = millisToTicks(PIECESPAWNDELAY);
             }
-            evtLockPiece(currentPiece, linesCleared, spinState, combo, backToBack);
+
+            evtLockPiece(currentPiece, linesCleared, spinState, combo, backToBack, nuke);
 
         }
 
@@ -888,7 +1025,7 @@ public abstract class GameLogic {
         }
         for (int j = 0; j < STAGESIZEX; j++) {
             if (j == garbageHole) {
-                stage[STAGESIZEY - 1][j] = PIECE_NONE;
+                stage[STAGESIZEY - 1][j] = ENABLENUKES ? PIECE_NUKE : PIECE_NONE;
             } else {
                 stage[STAGESIZEY - 1][j] = PIECE_GARBAGE;
             }
@@ -916,12 +1053,15 @@ public abstract class GameLogic {
         int state = SPINSTATES[oldRotation][newRotation];
 
         for (int tries = 0; tries < kickTable.maxTries(piece, state); tries++) {
-            if (movePiece(currentPiece.getX() + kickTable.getX(piece, state, tries), currentPiece.getY() - kickTable.getY(piece, state, tries), newRotation)) {
-                checkSpin(tries);
+            if (movePiece(
+                currentPiece.getX() + kickTable.getX(piece, state, tries),
+                currentPiece.getY() - kickTable.getY(piece, state, tries),
+                newRotation)
+            ) {
+                checkSpin(tries, oldRotation, newRotation);
                 return;
             }
         }
-
     }
 
     private void sendGarbage(int n) {
@@ -974,13 +1114,8 @@ public abstract class GameLogic {
     }
 
     private void tick() {
-        System.out.println("test " + ticksPassed);
-        if (gameState >= STATE_PAUSED) {
+        if (gameState >= STATE_PAUSED || gameState == STATE_DEAD) {
             return;
-        }
-
-        if (gameState == STATE_DEAD) {
-            throw new IllegalStateException("Ticked while dead");
         }
 
         if (gameState == STATE_DELAY) {
@@ -1028,15 +1163,18 @@ public abstract class GameLogic {
                 }
             }
 
-            if (downKey) {
-                downKeyTime++;
-                if (downKeyTime == 0) {
-                    movePieceRelative(1, 0);
-                    tick();
-                    return;
+            if (checkDownKey) {
+                checkDownKey = false;
+                if (downKey) {
+                    downKeyTime++;
+                    if (downKeyTime == 1) {
+                        movePieceRelative(0, 1);
+                        tick();
+                        return;
+                    }
+                } else {
+                    downKeyTime = 0;
                 }
-            } else {
-                downKeyTime = 0;
             }
 
             if (scheduleHardDrop) {
