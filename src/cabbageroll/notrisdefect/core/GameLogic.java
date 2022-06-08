@@ -53,15 +53,14 @@ public abstract class GameLogic {
 
     public static final int TPS = 20;
     public static final int TICK_TIME = 50;
+    public static final int BAGSIZE = 7;
+    public static final int PIECEPOINTS = 4;
     private static final int[][] SPINSTATES = {
         {-1, 0, 8, 7},
         {1, -1, 2, 10},
         {9, 3, -1, 4},
         {6, 11, 5, -1},
     };
-    private static final int BAGSIZE = 7;
-    private static final int PIECEPOINTS = 4;
-
     private final PieceTable pieceTable = PieceTable.GUIDELINE;
     private final KickTable kickTable = KickTable.SRS_180;
     private final GarbageTable garbageTable = GarbageTable.TETRIO;
@@ -80,7 +79,6 @@ public abstract class GameLogic {
             return millisToTicks((int) getWorkingValue());
         }
     };
-
     private int STAGESIZEX = 10;
     private int STAGESIZEY = 40;
     private int PLAYABLEROWS = 20;
@@ -90,17 +88,15 @@ public abstract class GameLogic {
     private int DEFAULTSPAWNROTATION = 0;
     private int PIECESPAWNDELAY = 100;
     private int LINECLEARDELAY = 500;
-    private int DAS = 200;
-    private int ARR = 50;
-    private int SDF = 8;
+    private int DAS;
+    private int ARR;
+    private int SDF;
     private boolean ENABLENUKES = false;
     private boolean ENABLEALLSPIN = false;
     private boolean ENABLEALWAYSGARBAGE = false;
-
     // permanent once a round starts
     private Random garbageRandomizer;
     private Random pieceRandomizer;
-
     // gameplay related stuff
     private int[][] stage;
     private Piece currentPiece;
@@ -111,14 +107,12 @@ public abstract class GameLogic {
     private Vector garbageQueue;
     private int garbageHole;
     private int combo;
-
     // helper variables
     private int counter;
     private int counterEnd;
     private int gameState;
     private int spinState;
     private int lowestPossiblePosition;
-
     // incremental
     private long ticksPassed;
     private long totalScore;
@@ -126,16 +120,20 @@ public abstract class GameLogic {
     private long totalPiecesPlaced;
     private long totalGarbageReceived;
     private long totalGarbageSent;
-
     // not fully implemented
     private int zoneLines;
     private boolean zone;
     private int backToBack;
-
     // keys
     private boolean leftKey;
     private boolean rightKey;
     private boolean downKey;
+    private boolean enqLeftKey;
+    private boolean enqRightKey;
+    private boolean enqDownKey;
+    private boolean deqLeftKey;
+    private boolean deqRightKey;
+    private boolean deqDownKey;
     private int leftKeyTime;
     private int rightKeyTime;
     private int downKeyTime;
@@ -147,6 +145,11 @@ public abstract class GameLogic {
     private boolean scheduleRotateCW;
     private boolean scheduleRotate180;
     private boolean scheduleHold;
+    protected GameLogic(int ARR, int DAS, int SDF) {
+        this.ARR = ARR;
+        this.DAS = DAS;
+        this.SDF = SDF;
+    }
 
     public void doAbort() {
         if (gameState == STATE_DEAD) {
@@ -180,33 +183,6 @@ public abstract class GameLogic {
         scheduleHold = true;
     }
 
-    // deprecated
-    public void doInstantSoftDrop() {
-        if (checkPausedOrInvalid()) {
-            return;
-        }
-
-        instantSoftDrop();
-    }
-
-    // deprecated
-    public void doMoveLeft() {
-        if (checkPausedOrInvalid()) {
-            return;
-        }
-
-        movePieceRelative(-1, 0);
-    }
-
-    // deprecated
-    public void doMoveRight() {
-        if (checkPausedOrInvalid()) {
-            return;
-        }
-
-        movePieceRelative(1, 0);
-    }
-
     public void doPause() {
         if (gameState == STATE_DEAD) {
             throw new IllegalStateException("Paused while dead");
@@ -220,7 +196,7 @@ public abstract class GameLogic {
             return;
         }
 
-        downKey = true;
+        enqDownKey = true;
     }
 
     public void doPressLeft() {
@@ -228,7 +204,7 @@ public abstract class GameLogic {
             return;
         }
 
-        leftKey = true;
+        enqLeftKey = true;
     }
 
     public void doPressRight() {
@@ -236,7 +212,7 @@ public abstract class GameLogic {
             return;
         }
 
-        rightKey = true;
+        enqRightKey = true;
     }
 
     public void doReleaseDown() {
@@ -244,7 +220,7 @@ public abstract class GameLogic {
             return;
         }
 
-        downKey = false;
+        deqDownKey = true;
     }
 
     public void doReleaseLeft() {
@@ -252,7 +228,7 @@ public abstract class GameLogic {
             return;
         }
 
-        leftKey = false;
+        deqLeftKey = true;
     }
 
     public void doReleaseRight() {
@@ -260,7 +236,7 @@ public abstract class GameLogic {
             return;
         }
 
-        rightKey = false;
+        deqRightKey = true;
     }
 
     public void doRotate180() {
@@ -287,16 +263,6 @@ public abstract class GameLogic {
         scheduleRotateCW = true;
     }
 
-    // deprecated
-    public void doSoftDrop() {
-        if (checkPausedOrInvalid()) {
-            return;
-        }
-
-        movePieceRelative(0, 1);
-        totalScore += Math.max(0, scoreTable.getSoftDrop());
-    }
-
     public void doStart() {
         doStart(new Random().nextLong());
     }
@@ -304,6 +270,10 @@ public abstract class GameLogic {
     public void doStart(double seed) {
         if (gameState != STATE_DEAD) {
             throw new IllegalStateException("Started while already running");
+        }
+
+        if (ARR < 0 || DAS < 0 || SDF < 0) {
+            throw new IllegalStateException("ARR, DAS and SDF must be positive");
         }
 
         pieceRandomizer = new Random((long) seed);
@@ -315,6 +285,10 @@ public abstract class GameLogic {
         if (gameState == STATE_DEAD) {
             throw new IllegalStateException("Ticked while dead");
         }
+
+        leftKey = enqLeftKey;
+        rightKey = enqRightKey;
+        downKey = enqDownKey;
 
         tick();
     }
@@ -743,26 +717,6 @@ public abstract class GameLogic {
         }
     }
 
-    // deprecated
-    private void dasLeft() {
-        int num = 0;
-        int x = currentPiece.getX();
-        while (!isColliding(x + num - 1, currentPiece.getY(), currentPiece.getRotation())) {
-            num--;
-        }
-        movePieceRelative(num, 0);
-    }
-
-    // deprecated
-    private void dasRight() {
-        int num = 0;
-        int x = currentPiece.getX();
-        while (!isColliding(x + num + 1, currentPiece.getY(), currentPiece.getRotation())) {
-            num++;
-        }
-        movePieceRelative(num, 0);
-    }
-
     private void die() {
         gameState = STATE_DEAD;
         evtGameover();
@@ -832,6 +786,12 @@ public abstract class GameLogic {
         leftKey = false;
         rightKey = false;
         downKey = false;
+        enqLeftKey = false;
+        enqRightKey = false;
+        enqDownKey = false;
+        deqLeftKey = false;
+        deqRightKey = false;
+        deqDownKey = false;
 
         leftKeyTime = 0;
         rightKeyTime = 0;
@@ -853,16 +813,6 @@ public abstract class GameLogic {
         lockDelay.reset();
 
         makeNextPiece();
-    }
-
-    private void instantSoftDrop() {
-        int num = 0;
-        int y = currentPiece.getY();
-        while (!isColliding(currentPiece.getX(), y + num + 1, currentPiece.getRotation())) {
-            num++;
-        }
-        totalScore += (long) scoreTable.getSoftDrop() * num;
-        movePieceRelative(0, num);
     }
 
     private boolean isColliding(int x, int y, int rotation) {
@@ -956,9 +906,9 @@ public abstract class GameLogic {
                     combo++;
                 } else {
                     combo = -1;
+                    tryToPutGarbage();
                 }
 
-                tryToPutGarbage();
                 counter = 0;
                 counterEnd = millisToTicks(PIECESPAWNDELAY);
             }
@@ -1023,12 +973,15 @@ public abstract class GameLogic {
         for (int i = 0; i < STAGESIZEY - 1; i++) {
             System.arraycopy(stage[i + 1], 0, stage[i], 0, STAGESIZEX);
         }
+
         for (int j = 0; j < STAGESIZEX; j++) {
-            if (j == garbageHole) {
-                stage[STAGESIZEY - 1][j] = ENABLENUKES ? PIECE_NUKE : PIECE_NONE;
-            } else {
-                stage[STAGESIZEY - 1][j] = PIECE_GARBAGE;
-            }
+            stage[STAGESIZEY - 1][j] = PIECE_GARBAGE;
+        }
+
+        stage[STAGESIZEY - 1][garbageHole] = ENABLENUKES ? PIECE_NUKE : PIECE_NONE;
+
+        if (ENABLENUKES) {
+            garbageHole = garbageRandomizer.nextInt(STAGESIZEX);
         }
 
         totalGarbageReceived++;
@@ -1139,7 +1092,7 @@ public abstract class GameLogic {
                 checkLeftKey = false;
                 if (leftKey) {
                     leftKeyTime++;
-                    if (leftKeyTime == 1 || (leftKeyTime > millisToTicks(DAS) && (leftKeyTime - millisToTicks(DAS)) % millisToTicks(ARR) == 0)) {
+                    if (leftKeyTime == 1 || (leftKeyTime > millisToTicks(DAS) && (millisToTicks(ARR) == 0 || (leftKeyTime - millisToTicks(DAS)) % millisToTicks(ARR) == 0))) {
                         movePieceRelative(-1, 0);
                         tick();
                         return;
@@ -1153,7 +1106,7 @@ public abstract class GameLogic {
                 checkRightKey = false;
                 if (rightKey) {
                     rightKeyTime++;
-                    if (rightKeyTime == 1 || (rightKeyTime > millisToTicks(DAS) && (rightKeyTime - millisToTicks(DAS)) % millisToTicks(ARR) == 0)) {
+                    if (rightKeyTime == 1 || (rightKeyTime > millisToTicks(DAS) && (millisToTicks(ARR) == 0 || (rightKeyTime - millisToTicks(DAS)) % millisToTicks(ARR) == 0))) {
                         movePieceRelative(1, 0);
                         tick();
                         return;
@@ -1226,10 +1179,19 @@ public abstract class GameLogic {
         checkLeftKey = true;
         checkRightKey = true;
         checkDownKey = true;
-    }
 
-    private int ticksToMillis(int n) {
-        return n * TICK_TIME;
+        if (deqLeftKey) {
+            enqLeftKey = false;
+            deqLeftKey = false;
+        }
+        if (deqRightKey) {
+            enqRightKey = false;
+            deqRightKey = false;
+        }
+        if (deqDownKey) {
+            enqDownKey = false;
+            deqDownKey = false;
+        }
     }
 
     private void togglePause() {
