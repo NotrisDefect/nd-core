@@ -56,17 +56,14 @@ public abstract class GameLogic {
     public static final int TPS = 20;
     public static final int TICK_TIME = 50;
     private static final int[][] SPINSTATES = {
-        {-1, 0, 8, 7},
-        {1, -1, 2, 10},
-        {9, 3, -1, 4},
-        {6, 11, 5, -1},
+        {0, 0, 8, 7},
+        {1, 0, 2, 10},
+        {9, 3, 0, 4},
+        {6, 11, 5, 0},
     };
-    private PieceTable pieceTable = PieceTable.GUIDELINE;
-    private KickTable kickTable = KickTable.SRS_180;
     private final GarbageTable garbageTable = GarbageTable.TETRIO;
     private final ScoreTable scoreTable = ScoreTable.NORMAL;
     private final MaskTable maskTable = MaskTable.SRS;
-
     private final Property garbageCap = new Property(4d, 60 * TPS, 0.05d, 8d);
     private final Property garbageMultiplier = new Property(1d, 30 * TPS, 0.02d, 2d);
     private final Property gravity = new Property(1d, 30 * TPS, 0.1d, 20d) {
@@ -79,6 +76,8 @@ public abstract class GameLogic {
             return millisToTicks((int) getWorkingValue());
         }
     };
+    private PieceTable pieceTable = PieceTable.GUIDELINE;
+    private KickTable kickTable = KickTable.SRS_180;
     private int STAGESIZEX = 10;
     private int STAGESIZEY = 40;
     private int PLAYABLEROWS = 20;
@@ -174,17 +173,6 @@ public abstract class GameLogic {
         }
 
         scheduleHardDrop = true;
-    }
-
-    public void lumines() {
-        pieceTable = PieceTable.LUMINES;
-        kickTable = KickTable.LUMINES;
-        DEFAULTSPAWNX = 7;
-        DEFAULTSPAWNY = 0;
-        STAGESIZEX = 16;
-        STAGESIZEY = 10;
-        PLAYABLEROWS = 8;
-        NEXTPIECES = 3;
     }
 
     public void doHold() {
@@ -573,6 +561,17 @@ public abstract class GameLogic {
         this.ENABLENUKES = ENABLENUKES;
     }
 
+    public void lumines() {
+        pieceTable = PieceTable.LUMINES;
+        kickTable = KickTable.LUMINES;
+        DEFAULTSPAWNX = 7;
+        DEFAULTSPAWNY = 0;
+        STAGESIZEX = 16;
+        STAGESIZEY = 10;
+        PLAYABLEROWS = 8;
+        NEXTPIECES = 3;
+    }
+
     protected abstract void evtGameover();
 
     protected abstract void evtLineClear(int row, int[] content);
@@ -640,6 +639,10 @@ public abstract class GameLogic {
                 sum += values[i];
             }
         }
+        if (pieceTable != PieceTable.GUIDELINE) {
+            return;
+        }
+
         if (currentPiece.getColors()[0] == PIECE_T || (ENABLEALLSPIN && currentPiece.getColors()[0] != PIECE_O && currentPiece.getColors()[0] != PIECE_I)) {
             if (sum < 11) {
                 spinState = SPIN_NONE;
@@ -857,7 +860,7 @@ public abstract class GameLogic {
 
         for (int i = 0; i < temp.length; i++) {
             Point p = temp[i];
-            stage[currentPiece.getY() + p.y][currentPiece.getX() + p.x] = currentPiece.getColors()[0];
+            stage[currentPiece.getY() + p.y][currentPiece.getX() + p.x] = currentPiece.getColors()[i];
         }
 
         checkLockOut();
@@ -1009,7 +1012,7 @@ public abstract class GameLogic {
 
     private void rotatePiece(int d) {
         int oldRotation = currentPiece.getRotation();
-        int newRotation = (currentPiece.getRotation() + d + 4) % 4;
+        int newRotation = (currentPiece.getRotation() + d + pieceTable.rotations(currentPiece.getOrdinal())) % pieceTable.rotations(currentPiece.getOrdinal());
         int piece = currentPiece.getOrdinal();
         int state = SPINSTATES[oldRotation][newRotation];
 
@@ -1243,12 +1246,12 @@ public abstract class GameLogic {
             this.rotation = rotation;
         }
 
-        public int getOrdinal() {
-            return ordinal;
-        }
-
         public int[] getColors() {
             return pieceTable.getPiece(ordinal, rotation).getColors();
+        }
+
+        public int getOrdinal() {
+            return ordinal;
         }
 
         public Point[] getPoints() {

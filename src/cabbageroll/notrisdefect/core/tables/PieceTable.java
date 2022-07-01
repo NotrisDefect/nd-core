@@ -12,14 +12,14 @@ public class PieceTable {
         {
             {{0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}},
             {{0, 1, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}},
-            {{1, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}},
-            {{1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}}
+            {{1, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}},
+            {{1, 0, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}}
         },
         {
             {{0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}},
             {{0, 1, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}},
-            {{1, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}},
-            {{1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}}
+            {{1, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}},
+            {{1, 0, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}}
         },
         {
             {{0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_2ND}},
@@ -28,8 +28,8 @@ public class PieceTable {
         {
             {{0, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}},
             {{0, 1, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}},
-            {{1, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}},
-            {{1, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}}
+            {{1, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}},
+            {{1, 0, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}}
         },
         {
             {{0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}}
@@ -152,6 +152,10 @@ public class PieceTable {
             }
         }
         return n;
+    }
+
+    public int rotations(int ordinal) {
+        return pieces[ordinal].length;
     }
 
     public static class Piece {
