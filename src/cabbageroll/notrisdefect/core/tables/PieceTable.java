@@ -1,89 +1,163 @@
 package cabbageroll.notrisdefect.core.tables;
 
+import cabbageroll.notrisdefect.core.GameLogic;
 import cabbageroll.notrisdefect.core.Point;
 
 public class PieceTable {
-    public static final PieceTable GUIDELINE = new PieceTable(new Point[][][]{
-        //Rotations: 0,R,2,L
-        //Z
+
+    public static final PieceTable LUMINES = new PieceTable(new int[][][][]{
         {
-            {new Point(0, 0), new Point(1, 0), new Point(1, 1), new Point(2, 1)},
-            {new Point(2, 0), new Point(2, 1), new Point(1, 1), new Point(1, 2)},
-            {new Point(2, 2), new Point(1, 2), new Point(1, 1), new Point(0, 1)},
-            {new Point(0, 2), new Point(0, 1), new Point(1, 1), new Point(1, 0)}
+            {{0, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}}
         },
-        //L
         {
-            {new Point(2, 0), new Point(0, 1), new Point(1, 1), new Point(2, 1)},
-            {new Point(1, 0), new Point(1, 2), new Point(1, 1), new Point(2, 2)},
-            {new Point(0, 2), new Point(2, 1), new Point(1, 1), new Point(0, 1)},
-            {new Point(1, 2), new Point(1, 0), new Point(1, 1), new Point(0, 0)}
+            {{0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}},
+            {{0, 1, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}},
+            {{1, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}},
+            {{1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}}
         },
-        //O
         {
-            {new Point(1, 0), new Point(2, 0), new Point(1, 1), new Point(2, 1)},
-            {new Point(1, 0), new Point(1, 1), new Point(2, 0), new Point(2, 1)},
-            {new Point(2, 1), new Point(1, 1), new Point(2, 0), new Point(1, 0)},
-            {new Point(2, 1), new Point(2, 0), new Point(1, 1), new Point(1, 0)},
+            {{0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}},
+            {{0, 1, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}},
+            {{1, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}},
+            {{1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}}
         },
-        //S
         {
-            {new Point(1, 0), new Point(2, 0), new Point(0, 1), new Point(1, 1)},
-            {new Point(1, 0), new Point(2, 1), new Point(1, 1), new Point(2, 2)},
-            {new Point(1, 2), new Point(0, 2), new Point(2, 1), new Point(1, 1)},
-            {new Point(1, 2), new Point(0, 1), new Point(1, 1), new Point(0, 0)}
+            {{0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_2ND}},
+            {{0, 1, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_2ND}}
         },
-        //I
         {
-            {new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(3, 1)},
-            {new Point(2, 0), new Point(2, 2), new Point(2, 1), new Point(2, 3)},
-            {new Point(3, 2), new Point(2, 2), new Point(1, 2), new Point(0, 2)},
-            {new Point(1, 3), new Point(1, 2), new Point(1, 1), new Point(1, 0)}
+            {{0, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}},
+            {{0, 1, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}},
+            {{1, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}},
+            {{1, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}}
         },
-        //J
         {
-            {new Point(0, 0), new Point(0, 1), new Point(1, 1), new Point(2, 1)},
-            {new Point(1, 0), new Point(1, 1), new Point(2, 0), new Point(1, 2)},
-            {new Point(2, 2), new Point(2, 1), new Point(1, 1), new Point(0, 1)},
-            {new Point(0, 2), new Point(1, 2), new Point(1, 1), new Point(1, 0)}
-        },
-        //T
-        {
-            {new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(2, 1)},
-            {new Point(1, 0), new Point(2, 1), new Point(1, 1), new Point(1, 2)},
-            {new Point(1, 2), new Point(2, 1), new Point(1, 1), new Point(0, 1)},
-            {new Point(1, 2), new Point(0, 1), new Point(1, 1), new Point(1, 0)}
+            {{0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}}
         }
     });
 
-    private static final int PIECES = 7;
-    private static final int ROTATIONS = 4;
-    private static final int POINTS = 4;
-    private final Point[][][] pieces;
+    public static final PieceTable GUIDELINE = new PieceTable(new int[][][][]{
+        {
+            {{0, 0}, {1, 0}, {1, 1}, {2, 1}},
+            {{2, 0}, {2, 1}, {1, 1}, {1, 2}},
+            {{2, 2}, {1, 2}, {1, 1}, {0, 1}},
+            {{0, 2}, {0, 1}, {1, 1}, {1, 0}}
+        },
+        {
+            {{2, 0}, {0, 1}, {1, 1}, {2, 1}},
+            {{1, 0}, {1, 2}, {1, 1}, {2, 2}},
+            {{0, 2}, {2, 1}, {1, 1}, {0, 1}},
+            {{1, 2}, {1, 0}, {1, 1}, {0, 0}}
+        },
+        {
+            {{1, 0}, {2, 0}, {1, 1}, {2, 1}},
+            {{1, 0}, {1, 1}, {2, 0}, {2, 1}},
+            {{2, 1}, {1, 1}, {2, 0}, {1, 0}},
+            {{2, 1}, {2, 0}, {1, 1}, {1, 0}},
+        },
+        {
+            {{1, 0}, {2, 0}, {0, 1}, {1, 1}},
+            {{1, 0}, {2, 1}, {1, 1}, {2, 2}},
+            {{1, 2}, {0, 2}, {2, 1}, {1, 1}},
+            {{1, 2}, {0, 1}, {1, 1}, {0, 0}}
+        },
+        {
+            {{0, 1}, {1, 1}, {2, 1}, {3, 1}},
+            {{2, 0}, {2, 2}, {2, 1}, {2, 3}},
+            {{3, 2}, {2, 2}, {1, 2}, {0, 2}},
+            {{1, 3}, {1, 2}, {1, 1}, {1, 0}}
+        },
+        {
+            {{0, 0}, {0, 1}, {1, 1}, {2, 1}},
+            {{1, 0}, {1, 1}, {2, 0}, {1, 2}},
+            {{2, 2}, {2, 1}, {1, 1}, {0, 1}},
+            {{0, 2}, {1, 2}, {1, 1}, {1, 0}}
+        },
+        {
+            {{1, 0}, {0, 1}, {1, 1}, {2, 1}},
+            {{1, 0}, {2, 1}, {1, 1}, {1, 2}},
+            {{1, 2}, {2, 1}, {1, 1}, {0, 1}},
+            {{1, 2}, {0, 1}, {1, 1}, {1, 0}}
+        }
+    }, new int[]{
+        GameLogic.PIECE_Z,
+        GameLogic.PIECE_L,
+        GameLogic.PIECE_O,
+        GameLogic.PIECE_S,
+        GameLogic.PIECE_I,
+        GameLogic.PIECE_J,
+        GameLogic.PIECE_T
+    });
 
-    public PieceTable(Point[][][] pieces) {
-        this.pieces = pieces;
-        if (!isValid()) {
-            throw new IllegalArgumentException();
+    private final Piece[][] pieces;
+
+    public PieceTable(int[][][][] table) {
+        pieces = new Piece[table.length][];
+        for (int i = 0; i < table.length; i++) {
+            int[][][] piece = table[i];
+            pieces[i] = new Piece[piece.length];
+
+            for (int j = 0; j < piece.length; j++) {
+                int[][] rotation = piece[j];
+                Point[] points = new Point[rotation.length];
+                int[] colors = new int[rotation.length];
+
+                for (int k = 0; k < rotation.length; k++) {
+                    int[] mino = rotation[k];
+                    points[k] = new Point(mino[0], mino[1]);
+                    colors[k] = mino[2];
+                }
+
+                pieces[i][j] = new Piece(points, colors);
+            }
         }
     }
 
-    public Point[] getPiece(int piece, int rotation) {
+    public PieceTable(int[][][][] table, int[] colors) {
+        pieces = new Piece[table.length][];
+        for (int i = 0; i < table.length; i++) {
+            int[][][] piece = table[i];
+            pieces[i] = new Piece[piece.length];
+
+            for (int j = 0; j < piece.length; j++) {
+                int[][] rotation = piece[j];
+                Point[] points = new Point[rotation.length];
+                int[] color = new int[rotation.length];
+
+                for (int k = 0; k < rotation.length; k++) {
+                    int[] mino = rotation[k];
+                    points[k] = new Point(mino[0], mino[1]);
+                    color[k] = colors[i];
+                }
+
+                pieces[i][j] = new Piece(points, color);
+            }
+        }
+    }
+
+    public int amount() {
+        return pieces.length;
+    }
+
+    public Piece getPiece(int piece, int rotation) {
         return pieces[piece][rotation];
     }
 
-    private boolean isValid() {
-        if (pieces.length == PIECES) {
-            for (int i = 0; i < PIECES; i++) {
-                if (pieces[i].length == ROTATIONS) {
-                    for (int j = 0; j < ROTATIONS; j++) {
-                        if (pieces[i][j].length == POINTS) {
-                            return true;
-                        }
-                    }
-                }
-            }
+    public static class Piece {
+        private final Point[] points;
+        private final int[] colors;
+
+        private Piece(Point[] points, int[] colors) {
+            this.points = points;
+            this.colors = colors;
         }
-        return false;
+
+        public int[] getColors() {
+            return colors;
+        }
+
+        public Point[] getPoints() {
+            return points;
+        }
     }
 }
