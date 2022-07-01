@@ -143,6 +143,17 @@ public class PieceTable {
         return pieces[piece][rotation];
     }
 
+    public int mostPiecePoints() {
+        int n = 0;
+        for (int i = 0; i < pieces.length; i++) {
+            Piece[] piece = pieces[i];
+            for (int j = 0; j < piece.length; j++) {
+                n = Math.max(n, piece[j].getPoints().length);
+            }
+        }
+        return n;
+    }
+
     public static class Piece {
         private final Point[] points;
         private final int[] colors;

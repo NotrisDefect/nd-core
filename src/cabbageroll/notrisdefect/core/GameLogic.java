@@ -55,8 +55,6 @@ public abstract class GameLogic {
 
     public static final int TPS = 20;
     public static final int TICK_TIME = 50;
-    public static final int BAGSIZE = 7;
-    public static final int PIECEPOINTS = 4;
     private static final int[][] SPINSTATES = {
         {-1, 0, 8, 7},
         {1, -1, 2, 10},
@@ -64,7 +62,7 @@ public abstract class GameLogic {
         {6, 11, 5, -1},
     };
     private PieceTable pieceTable = PieceTable.GUIDELINE;
-    private final KickTable kickTable = KickTable.SRS_180;
+    private KickTable kickTable = KickTable.SRS_180;
     private final GarbageTable garbageTable = GarbageTable.TETRIO;
     private final ScoreTable scoreTable = ScoreTable.NORMAL;
     private final MaskTable maskTable = MaskTable.SRS;
@@ -180,6 +178,13 @@ public abstract class GameLogic {
 
     public void lumines() {
         pieceTable = PieceTable.LUMINES;
+        kickTable = KickTable.LUMINES;
+        DEFAULTSPAWNX = 7;
+        DEFAULTSPAWNY = 0;
+        STAGESIZEX = 16;
+        STAGESIZEY = 10;
+        PLAYABLEROWS = 8;
+        NEXTPIECES = 3;
     }
 
     public void doHold() {
@@ -594,7 +599,7 @@ public abstract class GameLogic {
 
     private void checkBlockOut() {
         Point[] piece = currentPiece.getPoints();
-        for (int i = 0; i < PIECEPOINTS; i++) {
+        for (int i = 0; i < piece.length; i++) {
             Point point = piece[i];
             if (stage[point.y + currentPiece.getY()][point.x + currentPiece.getX()] != PIECE_NONE) {
                 tryToDie();
@@ -604,7 +609,7 @@ public abstract class GameLogic {
 
     private void checkLockOut() {
         Point[] piece = currentPiece.getPoints();
-        for (int i = 0; i < PIECEPOINTS; i++) {
+        for (int i = 0; i < piece.length; i++) {
             Point point = piece[i];
             if (currentPiece.getY() + point.y >= STAGESIZEY - PLAYABLEROWS) {
                 return;
@@ -764,7 +769,7 @@ public abstract class GameLogic {
             }
         }
 
-        nextPieces = new UsablePiece[NEXTPIECES + BAGSIZE];
+        nextPieces = new UsablePiece[NEXTPIECES + pieceTable.amount()];
         nextPiecesLeft = 0;
 
         heldPiece = null;
@@ -819,10 +824,8 @@ public abstract class GameLogic {
     }
 
     private boolean isColliding(int x, int y, int rotation) {
-        Point[] temp;
-
-        temp = currentPiece.getPoints(rotation);
-        for (int i = 0; i < PIECEPOINTS; i++) {
+        Point[] temp = currentPiece.getPoints(rotation);
+        for (int i = 0; i < temp.length; i++) {
             Point point = temp[i];
             if (isInsideBounds(x + point.x, y + point.y)) {
                 if (isSolid(x + point.x, y + point.y)) {
@@ -848,12 +851,11 @@ public abstract class GameLogic {
     }
 
     private void lockPiece() {
-        Point[] temp;
+        Point[] temp = currentPiece.getPoints();
 
         totalPiecesPlaced++;
 
-        temp = currentPiece.getPoints();
-        for (int i = 0; i < PIECEPOINTS; i++) {
+        for (int i = 0; i < temp.length; i++) {
             Point p = temp[i];
             stage[currentPiece.getY() + p.y][currentPiece.getX() + p.x] = currentPiece.getColors()[0];
         }
@@ -869,7 +871,7 @@ public abstract class GameLogic {
 
             if (ENABLENUKES) {
                 Point[] points = currentPiece.getPoints();
-                for (int i = 0; i < PIECEPOINTS; i++) {
+                for (int i = 0; i < temp.length; i++) {
                     Point p = points[i];
                     int x = currentPiece.getX() + p.x;
                     int y = currentPiece.getY() + p.y;
@@ -884,7 +886,7 @@ public abstract class GameLogic {
             if (linesCleared > 0) {
                 combo++;
 
-                if ((totalLinesCleared - totalGarbageReceived) * STAGESIZEX + totalGarbageReceived == totalPiecesPlaced * PIECEPOINTS) {
+                if ((totalLinesCleared - totalGarbageReceived) * STAGESIZEX + totalGarbageReceived == totalPiecesPlaced * temp.length) {
                     sendGarbage(10);
                     totalScore += scoreTable.getAllClear();
                     evtPerfectClear();
@@ -933,7 +935,7 @@ public abstract class GameLogic {
             for (int i = 0; i < pieceTable.amount(); i++) {
                 nextPieces[nextPiecesLeft + i] = new UsablePiece(bag[i], DEFAULTSPAWNX, DEFAULTSPAWNY, DEFAULTSPAWNROTATION);
             }
-            nextPiecesLeft += BAGSIZE;
+            nextPiecesLeft += pieceTable.amount();
         }
 
         spawnPiece();
