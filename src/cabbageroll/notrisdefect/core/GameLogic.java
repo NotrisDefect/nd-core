@@ -1012,8 +1012,8 @@ public abstract class GameLogic {
 
     private void rotatePiece(int d) {
         int oldRotation = currentPiece.getRotation();
-        int newRotation = (currentPiece.getRotation() + d + pieceTable.rotations(currentPiece.getOrdinal())) % pieceTable.rotations(currentPiece.getOrdinal());
         int piece = currentPiece.getOrdinal();
+        int newRotation = (oldRotation + d + pieceTable.rotations(piece)) % pieceTable.rotations(piece);
         int state = SPINSTATES[oldRotation][newRotation];
 
         for (int tries = 0; tries < kickTable.maxTries(piece, state); tries++) {

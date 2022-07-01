@@ -7,32 +7,32 @@ public class PieceTable {
 
     public static final PieceTable LUMINES = new PieceTable(new int[][][][]{
         {
-            {{0, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}}
+            {{0, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}}
         },
         {
-            {{0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}},
-            {{0, 1, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}},
-            {{1, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}},
-            {{1, 0, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}}
+            {{0, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}},
+            {{1, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}},
+            {{1, 1, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}},
+            {{0, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}}
         },
         {
-            {{0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}},
-            {{0, 1, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}},
-            {{1, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}},
-            {{1, 0, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}}
+            {{0, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}},
+            {{1, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}},
+            {{1, 1, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}},
+            {{0, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}}
         },
         {
-            {{0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_2ND}},
-            {{0, 1, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_2ND}}
+            {{0, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_2ND}},
+            {{1, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_2ND}}
         },
         {
-            {{0, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}},
-            {{0, 1, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}},
-            {{1, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}},
-            {{1, 0, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}}
+            {{0, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}},
+            {{1, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}},
+            {{1, 1, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}},
+            {{0, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}}
         },
         {
-            {{0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}}
+            {{0, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}}
         }
     });
 
