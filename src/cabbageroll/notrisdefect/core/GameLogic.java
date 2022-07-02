@@ -43,6 +43,8 @@ public abstract class GameLogic {
     public static final int PIECE_NUKE = 10;
     public static final int PIECE_1ST = PIECE_Z;
     public static final int PIECE_2ND = PIECE_L;
+    public static final int PIECE_1ST_CLEAR = 100 + PIECE_1ST;
+    public static final int PIECE_2ND_CLEAR = 100 + PIECE_2ND;
 
     public static final int SPIN_NONE = 0;
     public static final int SPIN_MINI = 1;
@@ -867,8 +869,11 @@ public abstract class GameLogic {
 
         if (zone) {
             clearLinesZone();
+        } else if (pieceTable == PieceTable.LUMINES) {
+            counter = 0;
+            counterEnd = millisToTicks(PIECESPAWNDELAY);
+            collapse();
         } else {
-
             int linesCleared = clearLines();
             boolean nuke = false;
 
@@ -907,6 +912,7 @@ public abstract class GameLogic {
                 if (ENABLEALWAYSGARBAGE) {
                     tryToPutGarbage();
                 }
+
                 counter = 0;
                 counterEnd = millisToTicks(LINECLEARDELAY);
             } else {
@@ -1094,6 +1100,7 @@ public abstract class GameLogic {
             if (counter == counterEnd) {
                 if (!movePieceRelative(0, +1)) {
                     lockPiece();
+                    gameState = STATE_DELAY;
                 }
                 tick();
                 return;
@@ -1177,15 +1184,43 @@ public abstract class GameLogic {
             }
         }
 
-        if (ticksPassed % TPS == TPS - 1) {
+        counter++;
+        ticksPassed++;
+
+        if (ticksPassed % TPS == 0) {
             gravity.tick(ticksPassed);
             garbageCap.tick(ticksPassed);
             garbageMultiplier.tick(ticksPassed);
             lockDelay.tick(ticksPassed);
         }
 
-        counter++;
-        ticksPassed++;
+        if (ticksPassed % 128 == 0 && pieceTable == PieceTable.LUMINES) {
+            int squares = 0;
+            for (int i = 0; i < STAGESIZEY - 1; i++) {
+                for (int j = 0; j < STAGESIZEX - 1; j++) {
+                    if (stage[i][j] != PIECE_NONE &&
+                        (stage[i][j] == stage[i][j+1] || stage[i][j] == stage[i][j+1] + 100) &&
+                        (stage[i][j] == stage[i+1][j] || stage[i][j] == stage[i+1][j] + 100) &&
+                        (stage[i][j] == stage[i+1][j+1] || stage[i][j] == stage[i+1][j+1] + 100)
+                    ) {
+                        squares++;
+                        stage[i][j] += 100;
+                        stage[i][j+1] += 100;
+                        stage[i+1][j] += 100;
+                        stage[i+1][j+1] += 100;
+                    }
+                }
+            }
+            System.out.println("squares: " + squares);
+            for (int i = 0; i < STAGESIZEY; i++) {
+                for (int j = 0; j < STAGESIZEX; j++) {
+                    if(stage[i][j] == PIECE_1ST_CLEAR || stage[i][j] == PIECE_2ND_CLEAR) {
+                        stage[i][j] = PIECE_NONE;
+                    }
+                }
+            }
+            collapse();
+        }
 
         checkLeftKey = true;
         checkRightKey = true;
@@ -1202,6 +1237,17 @@ public abstract class GameLogic {
         if (deqDownKey) {
             enqDownKey = false;
             deqDownKey = false;
+        }
+    }
+
+    private void collapse() {
+        for (int i = STAGESIZEY - 1; i > 0; i--) {
+            for (int j = 0; j < STAGESIZEX; j++) {
+                if(stage[i][j] == PIECE_NONE) {
+                    stage[i][j] = stage[i][j-1];
+                    stage[i][j-1] = PIECE_NONE;
+                }
+            }
         }
     }
 

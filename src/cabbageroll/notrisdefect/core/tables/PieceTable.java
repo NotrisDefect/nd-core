@@ -148,7 +148,11 @@ public class PieceTable {
         for (int i = 0; i < pieces.length; i++) {
             Piece[] piece = pieces[i];
             for (int j = 0; j < piece.length; j++) {
-                n = Math.max(n, piece[j].getPoints().length);
+                Point[] points = piece[j].getPoints();
+                for (int k = 0; k < points.length; k++) {
+                    n = Math.max(n, points[k].x);
+                    n = Math.max(n, points[k].y);
+                }
             }
         }
         return n;
