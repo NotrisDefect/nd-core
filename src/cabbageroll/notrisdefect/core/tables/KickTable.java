@@ -1,11 +1,15 @@
 package cabbageroll.notrisdefect.core.tables;
 
-import cabbageroll.notrisdefect.core.GameLogic;
 import cabbageroll.notrisdefect.core.Point;
 
 public class KickTable {
+
+    // JLSTZ
+    // I
+    // 0R,R0,R2,2R,2L,L2,L0,0L,02,20,RL,LR,00
+
     public static final KickTable SRS_PLUS = new KickTable(new int[][][][]{
-        {//J, L, S, T, Z Tetromino Wall Kick Data
+        {
             {{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},
             {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},
 
@@ -23,8 +27,10 @@ public class KickTable {
 
             {{0, 0}, {+1, 0}, {+1, +2}, {+1, +1}, {0, +2}, {0, +1}},
             {{0, 0}, {-1, 0}, {-1, +2}, {-1, +1}, {0, +2}, {0, +1}},
+
+            {{0, 0}}
         },
-        {//I Tetromino Wall Kick Data
+        {
             {{0, 0}, {+1, 0}, {-2, 0}, {-2, -1}, {+1, +2}},
             {{0, 0}, {-1, 0}, {+2, 0}, {-1, -2}, {+2, +1}},
 
@@ -41,11 +47,14 @@ public class KickTable {
             {{0, 0}, {0, -1}},
 
             {{0, 0}, {+1, 0}},
-            {{0, 0}, {-1, 0}}
+            {{0, 0}, {-1, 0}},
+
+            {{0, 0}}
         }
     });
+
     public static final KickTable SRS = new KickTable(new int[][][][]{
-        {//J, L, S, T, Z Tetromino Wall Kick Data
+        {
             {{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},
             {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},
 
@@ -63,8 +72,10 @@ public class KickTable {
 
             {},
             {},
+
+            {{0, 0}}
         },
-        {//I Tetromino Wall Kick Data
+        {
             {{0, 0}, {-2, 0}, {+1, 0}, {-2, -1}, {+1, +2}},
             {{0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}},
 
@@ -82,10 +93,13 @@ public class KickTable {
 
             {},
             {},
+
+            {{0, 0}}
         }
     });
+
     public static final KickTable SRS_180 = new KickTable(new int[][][][]{
-        {//J, L, S, T, Z Tetromino Wall Kick Data
+        {
             {{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},
             {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},
 
@@ -103,8 +117,10 @@ public class KickTable {
 
             {{0, 0}},
             {{0, 0}},
+
+            {{0, 0}}
         },
-        {//I Tetromino Wall Kick Data
+        {
             {{0, 0}, {-2, 0}, {+1, 0}, {-2, -1}, {+1, +2}},
             {{0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}},
 
@@ -122,10 +138,13 @@ public class KickTable {
 
             {{0, 0}},
             {{0, 0}},
+
+            {{0, 0}}
         }
     });
+
     public static final KickTable LUMINES = new KickTable(new int[][][][]{
-        {//J, L, S, T, Z Tetromino Wall Kick Data
+        {
             {{0, 0}},
             {{0, 0}},
 
@@ -138,13 +157,15 @@ public class KickTable {
             {{0, 0}},
             {{0, 0}},
 
-            {{0, 0}},
-            {{0, 0}},
+            {},
+            {},
 
-            {{0, 0}},
-            {{0, 0}},
+            {},
+            {},
+
+            {{0, 0}}
         },
-        {//I Tetromino Wall Kick Data
+        {
             {{0, 0}},
             {{0, 0}},
 
@@ -157,49 +178,99 @@ public class KickTable {
             {{0, 0}},
             {{0, 0}},
 
-            {{0, 0}},
-            {{0, 0}},
+            {},
+            {},
 
-            {{0, 0}},
-            {{0, 0}},
+            {},
+            {},
+
+            {{0, 0}}
         }
     });
 
-    /*
-    Order:
-    0R,R0,R2,2R,2L,L2,L0,0L
-    02,20,RL,LR
-    To disable specific rotation (most commonly 180 rotations),
-    don't put any tests and the rotation will fail (compare srs_guideline and srs_guideline_180).
-    */
+    public static final KickTable NO_ROTATION = new KickTable(new int[][][][]{
+        {
+            {},
+            {},
+
+            {},
+            {},
+
+            {},
+            {},
+
+            {},
+            {},
+
+            {},
+            {},
+
+            {},
+            {},
+
+            {}
+        },
+        {
+            {},
+            {},
+
+            {},
+            {},
+
+            {},
+            {},
+
+            {},
+            {},
+
+            {},
+            {},
+
+            {},
+            {},
+
+            {}
+        }
+    });
+
     private final Point[][][] kicks;
 
+    private static final int[][] SPINSTATES = {
+        {12, 0, 8, 7},
+        {1, 12, 2, 10},
+        {9, 3, 12, 4},
+        {6, 11, 5, 12},
+    };
+
     public KickTable(int[][][][] kicks) {
-        // shit
-        this.kicks = new Point[2][12][];
+        this.kicks = new Point[2][13][];
         for (int i = 0; i < kicks.length; i++) {
-            int[][][] type = kicks[i];
-            for (int j = 0; j < type.length; j++) {
-                int[][] row = type[j];
-                this.kicks[i][j] = new Point[row.length];
-                for (int k = 0; k < row.length; k++) {
-                    int[] offset = row[k];
+            int[][][] piece = kicks[i];
+            for (int j = 0; j < piece.length; j++) {
+                int[][] state = piece[j];
+                this.kicks[i][j] = new Point[state.length];
+                for (int k = 0; k < state.length; k++) {
+                    int[] offset = state[k];
                     this.kicks[i][j][k] = new Point(offset[0], offset[1]);
                 }
             }
         }
     }
 
+    public int getState(int oldRotation, int newRotation) {
+        return SPINSTATES[oldRotation][newRotation];
+    }
+
     public int getX(int piece, int state, int tries) {
-        return kicks[piece == GameLogic.PIECE_I ? 1 : 0][state][tries].x;
+        return kicks[piece == 4 ? 1 : 0][state][tries].x;
     }
 
     public int getY(int piece, int state, int tries) {
-        return kicks[piece == GameLogic.PIECE_I ? 1 : 0][state][tries].y;
+        return kicks[piece == 4 ? 1 : 0][state][tries].y;
     }
 
     public int maxTries(int piece, int state) {
-        return kicks[piece == GameLogic.PIECE_I ? 1 : 0][state].length;
+        return kicks[piece == 4 ? 1 : 0][state].length;
     }
 
 }

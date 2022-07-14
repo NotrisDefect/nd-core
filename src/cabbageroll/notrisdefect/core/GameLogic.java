@@ -11,40 +11,21 @@ import java.util.Vector;
 
 public abstract class GameLogic {
 
-    /*
-    abcd abcd
-    abc1 xabc
-    ab1d xabd
-    ab11 xxab
-    a1cd xacd
-    a1c1 xxac
-    a11d xxad
-    a111 xxxa
-    1bcd xbcd
-    1bc1 xxbc
-    1b1d xxbd
-    1b11 xxxb
-    11cd xxcd
-    11c1 xxxc
-    111d xxxd
-    1111 xxxx
-    */
-
-    public static final int PIECE_NONE = 0;
-    public static final int PIECE_Z = 1;
-    public static final int PIECE_L = 2;
-    public static final int PIECE_O = 3;
-    public static final int PIECE_S = 4;
-    public static final int PIECE_I = 5;
-    public static final int PIECE_J = 6;
-    public static final int PIECE_T = 7;
-    public static final int PIECE_GARBAGE = 8;
-    public static final int PIECE_ZONE = 9;
-    public static final int PIECE_NUKE = 10;
-    public static final int PIECE_1ST = PIECE_Z;
-    public static final int PIECE_2ND = PIECE_L;
-    public static final int PIECE_1ST_CLEAR = 100 + PIECE_1ST;
-    public static final int PIECE_2ND_CLEAR = 100 + PIECE_2ND;
+    public static final int BLOCK_NONE = 0;
+    public static final int BLOCK_RED = 1;
+    public static final int BLOCK_ORANGE = 2;
+    public static final int BLOCK_YELLOW = 3;
+    public static final int BLOCK_GREEN = 4;
+    public static final int BLOCK_LIGHTBLUE = 5;
+    public static final int BLOCK_BLUE = 6;
+    public static final int BLOCK_PURPLE = 7;
+    public static final int BLOCK_GRAY = 8;
+    public static final int BLOCK_WHITE = 9;
+    public static final int BLOCK_NUKE = 10;
+    public static final int BLOCK_TIMELINE = 100;
+    public static final int BLOCK_UNSTABLE = 200;
+    public static final int BLOCK_HARD = 300;
+    public static final int BLOCK_SQUEEZE = 1000;
 
     public static final int SPIN_NONE = 0;
     public static final int SPIN_MINI = 1;
@@ -52,20 +33,11 @@ public abstract class GameLogic {
 
     public static final int STATE_DEAD = 0;
     public static final int STATE_ALIVE = 1;
-    public static final int STATE_DELAY = 2;
-    public static final int STATE_PAUSED = 3;
+    public static final int STATE_ZONE = 2;
+    public static final int STATE_DELAY = 10;
+    public static final int STATE_PAUSED = 100;
 
     public static final int TPS = 20;
-    public static final int TICK_TIME = 50;
-    private static final int[][] SPINSTATES = {
-        {0, 0, 8, 7},
-        {1, 0, 2, 10},
-        {9, 3, 0, 4},
-        {6, 11, 5, 0},
-    };
-    private final GarbageTable garbageTable = GarbageTable.TETRIO;
-    private final ScoreTable scoreTable = ScoreTable.NORMAL;
-    private final MaskTable maskTable = MaskTable.SRS;
     private final Property garbageCap = new Property(4d, 60 * TPS, 0.05d, 8d);
     private final Property garbageMultiplier = new Property(1d, 30 * TPS, 0.02d, 2d);
     private final Property gravity = new Property(1d, 30 * TPS, 0.1d, 20d) {
@@ -78,6 +50,9 @@ public abstract class GameLogic {
             return millisToTicks((int) getWorkingValue());
         }
     };
+    private final GarbageTable garbageTable = GarbageTable.TEC;
+    private final ScoreTable scoreTable = ScoreTable.NORMAL;
+    private final MaskTable maskTable = MaskTable.SRS;
     private PieceTable pieceTable = PieceTable.GUIDELINE;
     private KickTable kickTable = KickTable.SRS_180;
     private int STAGESIZEX = 10;
@@ -95,9 +70,11 @@ public abstract class GameLogic {
     private boolean ENABLENUKES = false;
     private boolean ENABLEALLSPIN = false;
     private boolean ENABLEALWAYSGARBAGE = false;
+
     // permanent once a round starts
     private Random garbageRandomizer;
     private Random pieceRandomizer;
+
     // gameplay related stuff
     private int[][] stage;
     private UsablePiece currentPiece;
@@ -108,12 +85,15 @@ public abstract class GameLogic {
     private Vector garbageQueue;
     private int garbageHole;
     private int combo;
+
     // helper variables
     private int counter;
     private int counterEnd;
+    private long zoneActivationTick;
     private int gameState;
     private int spinState;
     private int lowestPossiblePosition;
+
     // incremental
     private long ticksPassed;
     private long totalScore;
@@ -121,10 +101,12 @@ public abstract class GameLogic {
     private long totalPiecesPlaced;
     private long totalGarbageReceived;
     private long totalGarbageSent;
+
     // not fully implemented
     private int zoneLines;
-    private boolean zone;
+    private int zoneCharge;
     private int backToBack;
+
     // keys
     private boolean leftKey;
     private boolean rightKey;
@@ -527,10 +509,6 @@ public abstract class GameLogic {
         return totalScore;
     }
 
-    public boolean getZone() {
-        return zone;
-    }
-
     public int getZoneLines() {
         return zoneLines;
     }
@@ -602,7 +580,7 @@ public abstract class GameLogic {
         Point[] piece = currentPiece.getPoints();
         for (int i = 0; i < piece.length; i++) {
             Point point = piece[i];
-            if (stage[point.y + currentPiece.getY()][point.x + currentPiece.getX()] != PIECE_NONE) {
+            if (stage[point.y + currentPiece.getY()][point.x + currentPiece.getX()] != BLOCK_NONE) {
                 tryToDie();
             }
         }
@@ -620,11 +598,11 @@ public abstract class GameLogic {
     }
 
     private boolean checkPausedOrInvalid() {
-        if (gameState == STATE_DEAD || gameState >= STATE_PAUSED) {
+        if (gameState == STATE_DEAD || gameState > STATE_PAUSED) {
             throw new IllegalStateException("Moved while dead or paused (" + gameState + ")");
         }
 
-        return gameState == STATE_DELAY;
+        return gameState > STATE_DELAY;
     }
 
     private void checkSpin(int tries, int oldRotation, int newRotation) {
@@ -645,7 +623,7 @@ public abstract class GameLogic {
             return;
         }
 
-        if (currentPiece.getColors()[0] == PIECE_T || (ENABLEALLSPIN && currentPiece.getColors()[0] != PIECE_O && currentPiece.getColors()[0] != PIECE_I)) {
+        if (currentPiece.getColors()[0] == BLOCK_PURPLE || (ENABLEALLSPIN && currentPiece.getColors()[0] != BLOCK_YELLOW && currentPiece.getColors()[0] != BLOCK_LIGHTBLUE)) {
             if (sum < 11) {
                 spinState = SPIN_NONE;
             } else {
@@ -670,16 +648,9 @@ public abstract class GameLogic {
 
         evtLineClear(line, lineCopy);
 
-        for (int i = line; i > 0; i--) {
-            System.arraycopy(stage[i - 1], 0, stage[i], 0, STAGESIZEX);
+        for (int i = 0; i < STAGESIZEX; i++) {
+            stage[line][i] = BLOCK_NONE;
         }
-
-        for (int j = 0; j < STAGESIZEX; j++) {
-            stage[0][j] = PIECE_NONE;
-        }
-
-        totalLinesCleared++;
-
     }
 
     private void clearLineZone(int line) {
@@ -688,44 +659,49 @@ public abstract class GameLogic {
             System.arraycopy(stage[i + 1], 0, stage[i], 0, STAGESIZEX);
         }
         for (int j = 0; j < STAGESIZEX; j++) {
-            stage[STAGESIZEY - zoneLines][j] = PIECE_ZONE;
+            stage[STAGESIZEY - zoneLines][j] = BLOCK_WHITE;
         }
     }
 
     private int clearLines() {
-        int linesCleared = 0;
-        boolean isFull;
+        int currentLinesCleared = 0;
+        int[] lines = new int[pieceTable.mostPiecePoints()];
         for (int i = STAGESIZEY - 1; i >= 0; i--) {
-            isFull = true;
-            for (int j = 0; j < STAGESIZEX; j++) {
-                if (stage[i][j] == PIECE_NONE || stage[i][j] == PIECE_NUKE) {
-                    isFull = false;
-                    break;
-                }
-            }
-            if (isFull) {
+            if (isLineFull(i)) {
                 clearLine(i);
-                i++;
-                linesCleared++;
+                lines[currentLinesCleared++] = i;
             }
         }
 
-        return linesCleared;
+        if (currentLinesCleared > 0) {
+            int[] lines2 = new int[currentLinesCleared];
+            System.arraycopy(lines, 0, lines2, 0, currentLinesCleared);
+            semiCollapse(lines2);
+            totalLinesCleared += currentLinesCleared;
+        }
+
+        return currentLinesCleared;
     }
 
     private void clearLinesZone() {
-        boolean isFull;
         for (int i = STAGESIZEY - 1 - zoneLines; i >= 0; i--) {
-            isFull = true;
-            for (int j = 0; j < STAGESIZEX; j++) {
-                if (stage[i][j] == PIECE_NONE) {
-                    isFull = false;
-                    break;
-                }
-            }
-            if (isFull) {
+            if (isLineFull(i)) {
                 zoneLines++;
                 clearLineZone(i);
+            }
+        }
+    }
+
+    private void collapse() {
+        //bandaid
+        for (int h = 0; h < STAGESIZEY; h++) {
+            for (int i = STAGESIZEY - 1; i > 0; i--) {
+                for (int j = 0; j < STAGESIZEX; j++) {
+                    if (stage[i][j] == BLOCK_NONE) {
+                        stage[i][j] = stage[i - 1][j];
+                        stage[i - 1][j] = BLOCK_NONE;
+                    }
+                }
             }
         }
     }
@@ -770,7 +746,7 @@ public abstract class GameLogic {
         stage = new int[STAGESIZEY][STAGESIZEX];
         for (int i = 0; i < STAGESIZEY; i++) {
             for (int j = 0; j < STAGESIZEX; j++) {
-                stage[i][j] = PIECE_NONE;
+                stage[i][j] = BLOCK_NONE;
             }
         }
 
@@ -784,7 +760,8 @@ public abstract class GameLogic {
         garbageHole = garbageRandomizer.nextInt(STAGESIZEX);
 
         zoneLines = 0;
-        zone = false;
+        zoneCharge = 0;
+        zoneActivationTick = -1;
 
         combo = -1;
         backToBack = -1;
@@ -847,8 +824,17 @@ public abstract class GameLogic {
         return y >= 0 && STAGESIZEY > y && x >= 0 && STAGESIZEX > x;
     }
 
+    private boolean isLineFull(int row) {
+        for (int i = 0; i < STAGESIZEX; i++) {
+            if (stage[row][i] == BLOCK_NONE || stage[row][i] == BLOCK_NUKE) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private boolean isSolid(int x, int y) {
-        return !isInsideBounds(x, y) || stage[y][x] != PIECE_NONE;
+        return !isInsideBounds(x, y) || stage[y][x] != BLOCK_NONE;
     }
 
     private boolean isTouchingGround() {
@@ -867,11 +853,12 @@ public abstract class GameLogic {
 
         checkLockOut();
 
-        if (zone) {
+        counter = 0;
+        counterEnd = millisToTicks(PIECESPAWNDELAY);
+
+        if (gameState == STATE_ZONE) {
             clearLinesZone();
         } else if (pieceTable == PieceTable.LUMINES) {
-            counter = 0;
-            counterEnd = millisToTicks(PIECESPAWNDELAY);
             collapse();
         } else {
             int linesCleared = clearLines();
@@ -883,7 +870,7 @@ public abstract class GameLogic {
                     Point p = points[i];
                     int x = currentPiece.getX() + p.x;
                     int y = currentPiece.getY() + p.y;
-                    if (isInsideBounds(x, y + 1) && stage[y + 1][x] == PIECE_NUKE) {
+                    if (isInsideBounds(x, y + 1) && stage[y + 1][x] == BLOCK_NUKE) {
                         clearLine(y + 1);
                         nuke = true;
                         break;
@@ -892,6 +879,7 @@ public abstract class GameLogic {
             }
 
             if (linesCleared > 0) {
+                counterEnd += millisToTicks(LINECLEARDELAY);
                 combo++;
 
                 if ((totalLinesCleared - totalGarbageReceived) * STAGESIZEX + totalGarbageReceived == totalPiecesPlaced * temp.length) {
@@ -899,6 +887,7 @@ public abstract class GameLogic {
                     totalScore += scoreTable.getAllClear();
                     evtPerfectClear();
                 }
+
                 sendGarbage((int) (garbageTable.get(linesCleared, spinState, combo) * garbageMultiplier.getWorkingValue()));
 
                 if (linesCleared == 4 || spinState != SPIN_NONE) {
@@ -913,8 +902,11 @@ public abstract class GameLogic {
                     tryToPutGarbage();
                 }
 
-                counter = 0;
-                counterEnd = millisToTicks(LINECLEARDELAY);
+                // bandaid
+                if (totalLinesCleared % 6 == 0) {
+                    zoneCharge = Math.min(zoneCharge + 1, 4);
+                }
+
             } else {
                 if (nuke) {
                     combo++;
@@ -922,15 +914,13 @@ public abstract class GameLogic {
                     combo = -1;
                     tryToPutGarbage();
                 }
-
-                counter = 0;
-                counterEnd = millisToTicks(PIECESPAWNDELAY);
             }
 
             evtLockPiece(currentPiece, linesCleared, spinState, combo, backToBack, nuke);
 
         }
 
+        gameState += STATE_DELAY;
         makeNextPiece();
     }
 
@@ -953,7 +943,7 @@ public abstract class GameLogic {
     }
 
     private int millisToTicks(int n) {
-        return n / TICK_TIME;
+        return n * TPS / 1000;
     }
 
     private boolean movePiece(int newX, int newY, int newR) {
@@ -981,7 +971,7 @@ public abstract class GameLogic {
     private void putGarbageLine() {
         // topout
         for (int j = 0; j < STAGESIZEX; j++) {
-            if (stage[0][j] != PIECE_NONE) {
+            if (stage[0][j] != BLOCK_NONE) {
                 tryToDie();
                 return;
             }
@@ -992,10 +982,10 @@ public abstract class GameLogic {
         }
 
         for (int j = 0; j < STAGESIZEX; j++) {
-            stage[STAGESIZEY - 1][j] = PIECE_GARBAGE;
+            stage[STAGESIZEY - 1][j] = BLOCK_GRAY;
         }
 
-        stage[STAGESIZEY - 1][garbageHole] = ENABLENUKES ? PIECE_NUKE : PIECE_NONE;
+        stage[STAGESIZEY - 1][garbageHole] = ENABLENUKES ? BLOCK_NUKE : BLOCK_NONE;
 
         if (ENABLENUKES) {
             garbageHole = garbageRandomizer.nextInt(STAGESIZEX);
@@ -1020,16 +1010,31 @@ public abstract class GameLogic {
         int oldRotation = currentPiece.getRotation();
         int piece = currentPiece.getOrdinal();
         int newRotation = (oldRotation + d + pieceTable.rotations(piece)) % pieceTable.rotations(piece);
-        int state = SPINSTATES[oldRotation][newRotation];
+        int state = kickTable.getState(oldRotation, newRotation);
 
         for (int tries = 0; tries < kickTable.maxTries(piece, state); tries++) {
-            if (movePiece(
-                currentPiece.getX() + kickTable.getX(piece, state, tries),
-                currentPiece.getY() - kickTable.getY(piece, state, tries),
-                newRotation)
-            ) {
+            if (movePiece(currentPiece.getX() + kickTable.getX(piece, state, tries), currentPiece.getY() - kickTable.getY(piece, state, tries), newRotation)) {
                 checkSpin(tries, oldRotation, newRotation);
                 return;
+            }
+        }
+    }
+
+    private void semiCollapse(int[] emptyLines) {
+        int gap = 0;
+
+        for (int i = emptyLines[0]; i > emptyLines.length; i--) {
+            if (gap < emptyLines.length && (i - gap) == emptyLines[gap]) {
+                gap++;
+                i++;
+            } else {
+                System.arraycopy(stage[i - gap], 0, stage[i], 0, STAGESIZEX);
+            }
+        }
+
+        for (int i = 0; i < emptyLines.length; i++) {
+            for (int j = 0; j < STAGESIZEX; j++) {
+                stage[i][j] = BLOCK_NONE;
             }
         }
     }
@@ -1066,46 +1071,60 @@ public abstract class GameLogic {
     }
 
     private void startZone() {
-        zone = true;
-        zoneLines = 0;
+        if (zoneCharge > 0) {
+            gameState = gameState - STATE_ALIVE + STATE_ZONE;
+            zoneLines = 0;
+            zoneActivationTick = ticksPassed;
+        }
     }
 
     private void stopZone() {
-        zone = false;
+        for (int i = 0; i < GarbageTable.ZONEBONUS[zoneCharge][zoneLines].length; i++) {
+            sendGarbage(GarbageTable.ZONEBONUS[zoneCharge][zoneLines][i]);
+        }
+        zoneCharge = 0;
+        gameState = gameState - STATE_ZONE + STATE_ALIVE;
         for (int i = 0; i < STAGESIZEY; i++) {
             for (int j = 0; j < STAGESIZEX; j++) {
                 if (STAGESIZEY - zoneLines - 1 - i >= 0) {
                     stage[STAGESIZEY - 1 - i][j] = stage[STAGESIZEY - zoneLines - 1 - i][j];
                 } else {
-                    stage[STAGESIZEY - 1 - i][j] = PIECE_NONE;
+                    stage[STAGESIZEY - 1 - i][j] = BLOCK_NONE;
                 }
             }
         }
     }
 
     private void tick() {
-        if (gameState >= STATE_PAUSED || gameState == STATE_DEAD) {
+        if (gameState > STATE_PAUSED || gameState == STATE_DEAD) {
             return;
         }
 
-        if (gameState == STATE_DELAY) {
+        if (gameState > STATE_DELAY) {
             if (counter == counterEnd) {
-                gameState = STATE_ALIVE;
+                gameState -= STATE_DELAY;
                 counter = 0;
                 calcCounterEnd();
                 tick();
                 return;
             }
-        } else {
+        }
+
+        if (gameState == STATE_ZONE) {
+            if (ticksPassed == zoneActivationTick + (long) zoneCharge * 5 * TPS) {
+                stopZone();
+            }
+        } else if (gameState == STATE_ALIVE) {
             if (counter == counterEnd) {
                 if (!movePieceRelative(0, +1)) {
                     lockPiece();
-                    gameState = STATE_DELAY;
                 }
                 tick();
                 return;
             }
+        }
 
+        if (gameState < STATE_DELAY) {
             if (checkLeftKey) {
                 checkLeftKey = false;
                 if (leftKey) {
@@ -1198,24 +1217,23 @@ public abstract class GameLogic {
             int squares = 0;
             for (int i = 0; i < STAGESIZEY - 1; i++) {
                 for (int j = 0; j < STAGESIZEX - 1; j++) {
-                    if (stage[i][j] != PIECE_NONE &&
-                        (stage[i][j] == stage[i][j+1] || stage[i][j] == stage[i][j+1] + 100) &&
-                        (stage[i][j] == stage[i+1][j] || stage[i][j] == stage[i+1][j] + 100) &&
-                        (stage[i][j] == stage[i+1][j+1] || stage[i][j] == stage[i+1][j+1] + 100)
+                    if (stage[i][j] != BLOCK_NONE &&
+                        (stage[i][j] % BLOCK_TIMELINE == stage[i][j + 1] % BLOCK_TIMELINE) &&
+                        (stage[i][j] % BLOCK_TIMELINE == stage[i + 1][j] % BLOCK_TIMELINE) &&
+                        (stage[i][j] % BLOCK_TIMELINE == stage[i + 1][j + 1] % BLOCK_TIMELINE)
                     ) {
                         squares++;
-                        stage[i][j] += 100;
-                        stage[i][j+1] += 100;
-                        stage[i+1][j] += 100;
-                        stage[i+1][j+1] += 100;
+                        stage[i][j] = stage[i][j] % BLOCK_TIMELINE + BLOCK_TIMELINE;
+                        stage[i][j + 1] = stage[i][j + 1] % BLOCK_TIMELINE + BLOCK_TIMELINE;
+                        stage[i + 1][j] = stage[i + 1][j] % BLOCK_TIMELINE + BLOCK_TIMELINE;
+                        stage[i + 1][j + 1] = stage[i + 1][j + 1] % BLOCK_TIMELINE + BLOCK_TIMELINE;
                     }
                 }
             }
-            System.out.println("squares: " + squares);
             for (int i = 0; i < STAGESIZEY; i++) {
                 for (int j = 0; j < STAGESIZEX; j++) {
-                    if(stage[i][j] == PIECE_1ST_CLEAR || stage[i][j] == PIECE_2ND_CLEAR) {
-                        stage[i][j] = PIECE_NONE;
+                    if (BLOCK_RED + BLOCK_TIMELINE <= stage[i][j] && stage[i][j] <= BLOCK_WHITE + BLOCK_TIMELINE) {
+                        stage[i][j] = BLOCK_NONE;
                     }
                 }
             }
@@ -1240,27 +1258,16 @@ public abstract class GameLogic {
         }
     }
 
-    private void collapse() {
-        for (int i = STAGESIZEY - 1; i > 0; i--) {
-            for (int j = 0; j < STAGESIZEX; j++) {
-                if(stage[i][j] == PIECE_NONE) {
-                    stage[i][j] = stage[i][j-1];
-                    stage[i][j-1] = PIECE_NONE;
-                }
-            }
-        }
-    }
-
     private void togglePause() {
-        if (gameState < STATE_PAUSED) {
-            gameState += STATE_PAUSED;
-        } else {
+        if (gameState > STATE_PAUSED) {
             gameState -= STATE_PAUSED;
+        } else {
+            gameState += STATE_PAUSED;
         }
     }
 
     private void tryToDie() {
-        if (zone) {
+        if (gameState == STATE_ZONE) {
             stopZone();
         } else {
             die();

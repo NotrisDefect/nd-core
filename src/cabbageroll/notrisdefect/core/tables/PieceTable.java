@@ -7,32 +7,32 @@ public class PieceTable {
 
     public static final PieceTable LUMINES = new PieceTable(new int[][][][]{
         {
-            {{0, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}}
+            {{0, 0, GameLogic.BLOCK_WHITE}, {1, 0, GameLogic.BLOCK_WHITE}, {0, 1, GameLogic.BLOCK_WHITE}, {1, 1, GameLogic.BLOCK_WHITE}}
         },
         {
-            {{0, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}},
-            {{1, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}},
-            {{1, 1, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}},
-            {{0, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}}
+            {{0, 0, GameLogic.BLOCK_ORANGE}, {1, 0, GameLogic.BLOCK_WHITE}, {0, 1, GameLogic.BLOCK_WHITE}, {1, 1, GameLogic.BLOCK_WHITE}},
+            {{1, 0, GameLogic.BLOCK_ORANGE}, {1, 1, GameLogic.BLOCK_WHITE}, {0, 0, GameLogic.BLOCK_WHITE}, {0, 1, GameLogic.BLOCK_WHITE}},
+            {{1, 1, GameLogic.BLOCK_ORANGE}, {0, 1, GameLogic.BLOCK_WHITE}, {1, 0, GameLogic.BLOCK_WHITE}, {0, 0, GameLogic.BLOCK_WHITE}},
+            {{0, 1, GameLogic.BLOCK_ORANGE}, {0, 0, GameLogic.BLOCK_WHITE}, {1, 1, GameLogic.BLOCK_WHITE}, {1, 0, GameLogic.BLOCK_WHITE}}
         },
         {
-            {{0, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_1ST}},
-            {{1, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}},
-            {{1, 1, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}},
-            {{0, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_1ST}}
+            {{0, 0, GameLogic.BLOCK_ORANGE}, {1, 0, GameLogic.BLOCK_ORANGE}, {0, 1, GameLogic.BLOCK_WHITE}, {1, 1, GameLogic.BLOCK_WHITE}},
+            {{1, 0, GameLogic.BLOCK_ORANGE}, {1, 1, GameLogic.BLOCK_ORANGE}, {0, 0, GameLogic.BLOCK_WHITE}, {0, 1, GameLogic.BLOCK_WHITE}},
+            {{1, 1, GameLogic.BLOCK_ORANGE}, {0, 1, GameLogic.BLOCK_ORANGE}, {1, 0, GameLogic.BLOCK_WHITE}, {0, 0, GameLogic.BLOCK_WHITE}},
+            {{0, 1, GameLogic.BLOCK_ORANGE}, {0, 0, GameLogic.BLOCK_ORANGE}, {1, 1, GameLogic.BLOCK_WHITE}, {1, 0, GameLogic.BLOCK_WHITE}}
         },
         {
-            {{0, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_2ND}},
-            {{1, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_2ND}}
+            {{0, 0, GameLogic.BLOCK_ORANGE}, {1, 0, GameLogic.BLOCK_WHITE}, {0, 1, GameLogic.BLOCK_WHITE}, {1, 1, GameLogic.BLOCK_ORANGE}},
+            {{1, 0, GameLogic.BLOCK_ORANGE}, {1, 1, GameLogic.BLOCK_WHITE}, {0, 0, GameLogic.BLOCK_WHITE}, {0, 1, GameLogic.BLOCK_ORANGE}}
         },
         {
-            {{0, 0, GameLogic.PIECE_1ST}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}},
-            {{1, 0, GameLogic.PIECE_1ST}, {1, 1, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}},
-            {{1, 1, GameLogic.PIECE_1ST}, {0, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {0, 0, GameLogic.PIECE_2ND}},
-            {{0, 1, GameLogic.PIECE_1ST}, {0, 0, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}}
+            {{0, 0, GameLogic.BLOCK_WHITE}, {1, 0, GameLogic.BLOCK_ORANGE}, {0, 1, GameLogic.BLOCK_ORANGE}, {1, 1, GameLogic.BLOCK_ORANGE}},
+            {{1, 0, GameLogic.BLOCK_WHITE}, {1, 1, GameLogic.BLOCK_ORANGE}, {0, 0, GameLogic.BLOCK_ORANGE}, {0, 1, GameLogic.BLOCK_ORANGE}},
+            {{1, 1, GameLogic.BLOCK_WHITE}, {0, 1, GameLogic.BLOCK_ORANGE}, {1, 0, GameLogic.BLOCK_ORANGE}, {0, 0, GameLogic.BLOCK_ORANGE}},
+            {{0, 1, GameLogic.BLOCK_WHITE}, {0, 0, GameLogic.BLOCK_ORANGE}, {1, 1, GameLogic.BLOCK_ORANGE}, {1, 0, GameLogic.BLOCK_ORANGE}}
         },
         {
-            {{0, 0, GameLogic.PIECE_2ND}, {1, 0, GameLogic.PIECE_2ND}, {0, 1, GameLogic.PIECE_2ND}, {1, 1, GameLogic.PIECE_2ND}}
+            {{0, 0, GameLogic.BLOCK_ORANGE}, {1, 0, GameLogic.BLOCK_ORANGE}, {0, 1, GameLogic.BLOCK_ORANGE}, {1, 1, GameLogic.BLOCK_ORANGE}}
         }
     });
 
@@ -51,15 +51,12 @@ public class PieceTable {
         },
         {
             {{1, 0}, {2, 0}, {1, 1}, {2, 1}},
-            {{1, 0}, {1, 1}, {2, 0}, {2, 1}},
-            {{2, 1}, {1, 1}, {2, 0}, {1, 0}},
-            {{2, 1}, {2, 0}, {1, 1}, {1, 0}},
         },
         {
             {{1, 0}, {2, 0}, {0, 1}, {1, 1}},
-            {{1, 0}, {2, 1}, {1, 1}, {2, 2}},
+            {{2, 1}, {2, 2}, {1, 0}, {1, 1}},
             {{1, 2}, {0, 2}, {2, 1}, {1, 1}},
-            {{1, 2}, {0, 1}, {1, 1}, {0, 0}}
+            {{0, 1}, {0, 0}, {1, 2}, {1, 1}}
         },
         {
             {{0, 1}, {1, 1}, {2, 1}, {3, 1}},
@@ -69,24 +66,24 @@ public class PieceTable {
         },
         {
             {{0, 0}, {0, 1}, {1, 1}, {2, 1}},
-            {{1, 0}, {1, 1}, {2, 0}, {1, 2}},
+            {{2, 0}, {1, 0}, {1, 1}, {1, 2}},
             {{2, 2}, {2, 1}, {1, 1}, {0, 1}},
             {{0, 2}, {1, 2}, {1, 1}, {1, 0}}
         },
         {
             {{1, 0}, {0, 1}, {1, 1}, {2, 1}},
-            {{1, 0}, {2, 1}, {1, 1}, {1, 2}},
-            {{1, 2}, {2, 1}, {1, 1}, {0, 1}},
+            {{2, 1}, {1, 0}, {1, 1}, {1, 2}},
+            {{2, 1}, {1, 2}, {1, 1}, {0, 1}},
             {{1, 2}, {0, 1}, {1, 1}, {1, 0}}
         }
     }, new int[]{
-        GameLogic.PIECE_Z,
-        GameLogic.PIECE_L,
-        GameLogic.PIECE_O,
-        GameLogic.PIECE_S,
-        GameLogic.PIECE_I,
-        GameLogic.PIECE_J,
-        GameLogic.PIECE_T
+        GameLogic.BLOCK_RED,
+        GameLogic.BLOCK_ORANGE,
+        GameLogic.BLOCK_YELLOW,
+        GameLogic.BLOCK_GREEN,
+        GameLogic.BLOCK_LIGHTBLUE,
+        GameLogic.BLOCK_BLUE,
+        GameLogic.BLOCK_PURPLE
     });
 
     private final Piece[][] pieces;
@@ -155,7 +152,7 @@ public class PieceTable {
                 }
             }
         }
-        return n;
+        return n + 1;
     }
 
     public int rotations(int ordinal) {
