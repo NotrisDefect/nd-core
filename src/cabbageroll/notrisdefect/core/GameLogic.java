@@ -83,6 +83,7 @@ public abstract class GameLogic {
     private UsablePiece heldPiece;
     private boolean held;
     private Vector garbageQueue;
+    private Vector garbageAccumulator;
     private int garbageHole;
     private int combo;
 
@@ -105,6 +106,7 @@ public abstract class GameLogic {
     // not fully implemented
     private int zoneLines;
     private int zoneCharge;
+    private int preZoneLineCounter;
     private int backToBack;
 
     // keys
@@ -509,11 +511,11 @@ public abstract class GameLogic {
         return totalScore;
     }
 
-    public int getZoneLines() {
-        return zoneLines;
+    public int getZoneCharge() {
+        return zoneCharge;
     }
 
-    public int getZonelines() {
+    public int getZoneLines() {
         return zoneLines;
     }
 
@@ -653,16 +655,6 @@ public abstract class GameLogic {
         }
     }
 
-    private void clearLineZone(int line) {
-        int gap = STAGESIZEY - (line + zoneLines);
-        for (int i = line; i < line + gap; i++) {
-            System.arraycopy(stage[i + 1], 0, stage[i], 0, STAGESIZEX);
-        }
-        for (int j = 0; j < STAGESIZEX; j++) {
-            stage[STAGESIZEY - zoneLines][j] = BLOCK_WHITE;
-        }
-    }
-
     private int clearLines() {
         int currentLinesCleared = 0;
         int[] lines = new int[pieceTable.mostPiecePoints()];
@@ -676,20 +668,35 @@ public abstract class GameLogic {
         if (currentLinesCleared > 0) {
             int[] lines2 = new int[currentLinesCleared];
             System.arraycopy(lines, 0, lines2, 0, currentLinesCleared);
-            semiCollapse(lines2);
             totalLinesCleared += currentLinesCleared;
+            preZoneLineCounter += currentLinesCleared;
+            semiCollapse(lines2);
         }
 
         return currentLinesCleared;
     }
 
-    private void clearLinesZone() {
-        for (int i = STAGESIZEY - 1 - zoneLines; i >= 0; i--) {
+    private int clearLinesZone() {
+        int currentLinesCleared = 0;
+        int[] lines = new int[pieceTable.mostPiecePoints()];
+        for (int i = 0; i < STAGESIZEY - zoneLines; i++) {
             if (isLineFull(i)) {
-                zoneLines++;
-                clearLineZone(i);
+                for (int j = 0; j < STAGESIZEX; j++) {
+                    stage[i][j] = BLOCK_NONE;
+                }
+                lines[currentLinesCleared++] = i;
             }
         }
+
+        if (currentLinesCleared > 0) {
+            int[] lines2 = new int[currentLinesCleared];
+            System.arraycopy(lines, 0, lines2, 0, currentLinesCleared);
+            totalLinesCleared += currentLinesCleared;
+            semiCollapseZone(lines2);
+        }
+
+        zoneLines += currentLinesCleared;
+        return currentLinesCleared;
     }
 
     private void collapse() {
@@ -761,6 +768,7 @@ public abstract class GameLogic {
 
         zoneLines = 0;
         zoneCharge = 0;
+        preZoneLineCounter = 0;
         zoneActivationTick = -1;
 
         combo = -1;
@@ -857,7 +865,23 @@ public abstract class GameLogic {
         counterEnd = millisToTicks(PIECESPAWNDELAY);
 
         if (gameState == STATE_ZONE) {
-            clearLinesZone();
+            int linesCleared = clearLinesZone();
+
+            if (linesCleared > 0) {
+                combo++;
+
+                if (linesCleared == 4 || spinState != SPIN_NONE) {
+                    backToBack++;
+                } else {
+                    backToBack = -1;
+                }
+
+                garbageAccumulator.addElement(new Integer((int) (garbageTable.get(linesCleared, spinState, combo) * garbageMultiplier.getWorkingValue())));
+
+            } else {
+                combo = -1;
+            }
+
         } else if (pieceTable == PieceTable.LUMINES) {
             collapse();
         } else {
@@ -902,8 +926,8 @@ public abstract class GameLogic {
                     tryToPutGarbage();
                 }
 
-                // bandaid
-                if (totalLinesCleared % 6 == 0) {
+                if (preZoneLineCounter >= 6) {
+                    preZoneLineCounter -= 6;
                     zoneCharge = Math.min(zoneCharge + 1, 4);
                 }
 
@@ -1023,7 +1047,7 @@ public abstract class GameLogic {
     private void semiCollapse(int[] emptyLines) {
         int gap = 0;
 
-        for (int i = emptyLines[0]; i > emptyLines.length; i--) {
+        for (int i = emptyLines[0]; i >= emptyLines.length; i--) {
             if (gap < emptyLines.length && (i - gap) == emptyLines[gap]) {
                 gap++;
                 i++;
@@ -1035,6 +1059,25 @@ public abstract class GameLogic {
         for (int i = 0; i < emptyLines.length; i++) {
             for (int j = 0; j < STAGESIZEX; j++) {
                 stage[i][j] = BLOCK_NONE;
+            }
+        }
+    }
+
+    private void semiCollapseZone(int[] emptyLines) {
+        int gap = 0;
+
+        for (int i = emptyLines[0]; i < STAGESIZEY - emptyLines.length; i++) {
+            if (gap < emptyLines.length && (i + gap) == emptyLines[gap]) {
+                gap++;
+                i--;
+            } else {
+                System.arraycopy(stage[i + gap], 0, stage[i], 0, STAGESIZEX);
+            }
+        }
+
+        for (int i = STAGESIZEY - emptyLines.length; i < STAGESIZEY; i++) {
+            for (int j = 0; j < STAGESIZEX; j++) {
+                stage[i][j] = BLOCK_WHITE;
             }
         }
     }
@@ -1075,12 +1118,16 @@ public abstract class GameLogic {
             gameState = gameState - STATE_ALIVE + STATE_ZONE;
             zoneLines = 0;
             zoneActivationTick = ticksPassed;
+            garbageAccumulator = new Vector();
         }
     }
 
     private void stopZone() {
-        for (int i = 0; i < GarbageTable.ZONEBONUS[zoneCharge][zoneLines].length; i++) {
-            sendGarbage(GarbageTable.ZONEBONUS[zoneCharge][zoneLines][i]);
+        for (int i = 0; i < garbageAccumulator.size(); i++) {
+            sendGarbage(((Integer) garbageAccumulator.get(i)).intValue());
+        }
+        for (int i = 0; i < GarbageTable.ZONEBONUS[zoneCharge - 1][zoneLines].length; i++) {
+            sendGarbage(GarbageTable.ZONEBONUS[zoneCharge - 1][zoneLines][i]);
         }
         zoneCharge = 0;
         gameState = gameState - STATE_ZONE + STATE_ALIVE;
