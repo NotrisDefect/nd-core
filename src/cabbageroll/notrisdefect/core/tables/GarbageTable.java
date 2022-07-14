@@ -135,8 +135,13 @@ public class GarbageTable {
 
     public static final GarbageTable TEC = new GarbageTable(new int[0][0][0]) {
         public int get(int lines, int spin, int combo) {
+            int[][] base = {
+                {0, 1, 2, 4},
+                {0, 1, 0, 0},
+                {2, 4, 6, 0}
+            };
             int[] bonus = {0, 0, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4};
-            return bonus[Math.min(bonus.length - 1, combo)] + lines * Math.max(1, spin);
+            return bonus[Math.min(bonus.length - 1, combo)] + base[spin][lines - 1];
         }
     };
 
